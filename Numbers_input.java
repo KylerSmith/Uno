@@ -1,4 +1,5 @@
 import java.io.*;
+//import java.util.random.*;
 public class Numbers_input {
 	public static void main(String[] args) throws IOException {
 		BufferedReader input = new BufferedReader (new InputStreamReader (System.in));
