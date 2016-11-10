@@ -156,6 +156,7 @@ public class UNOPANEL extends JFrame {
 			      System.out.println("No button clicked");
 			    } else if (response == JOptionPane.YES_OPTION) {
 			      System.out.println("Yes button clicked");
+			      System.exit(0); // KAS 11/10
 			    } else if (response == JOptionPane.CLOSED_OPTION) {
 			      System.out.println("JOptionPane closed");
 			    }
