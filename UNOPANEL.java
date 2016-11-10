@@ -147,6 +147,8 @@ public class UNOPANEL extends JFrame {
 		});
 		btnExit.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				
+				// Close dialog code
 				JDialog.setDefaultLookAndFeelDecorated(true);
 			    int response = JOptionPane.showConfirmDialog(null, "Are you sure you want to exit?", "Exit game",
 			        JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
@@ -157,8 +159,10 @@ public class UNOPANEL extends JFrame {
 			    } else if (response == JOptionPane.CLOSED_OPTION) {
 			      System.out.println("JOptionPane closed");
 			    }
-				
+			    // End of close dialog code
+			    
 			}
+			
 		});
 		
 		play.addActionListener(new ActionListener() {
