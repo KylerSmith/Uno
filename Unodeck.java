@@ -12,26 +12,22 @@ import java.util.Random;
 
 public class Unodeck {
 	
-	final int MAX_DECK_SIZE = 98;
+	final int MAX_DECK_SIZE = 82;
 
-	Unocard[] deck = new Unocard[98];
+	Unocard[] deck = new Unocard[MAX_DECK_SIZE];
 	int deckSize = 0;
 	Unocard top = deck[deckSize];
+	boolean empty = true;
 	
 	
 	//==================================================================================
 
 	
 	public void displayDeck() {
-		
 		for (int i = 0; i < deck.length; ++i) {
 			System.out.println(deck[i].color + " " + deck[i].value);
 		}
-		
 	}
-	
-	
-	
 	
 	//==================================================================================
 	
@@ -40,7 +36,7 @@ public class Unodeck {
 		/* chooses the value of the cards */
 		int cardNum = 0; 
 		/* numOfEaColor will determine how many number cards we use */
-		int numOfEaColor = 11;
+		int numOfEaColor = 9;
 		/* color increment keeps track of what color to assign */
 		int colorInc = 0;
 
@@ -71,11 +67,11 @@ public class Unodeck {
 			
 			/* If statements set the 2 wildcards */
 			if (i == deck.length - 2) {
-				newCard.value = 12;
+				newCard.value = 10;
 				newCard.color = "black";
 			} 
 			if (i == deck.length - 1) {
-				newCard.value = 13;
+				newCard.value = 11;
 				newCard.color = "black";
 			} 
 			
@@ -85,8 +81,9 @@ public class Unodeck {
 		} // for loop end
 		/* after the deck is filled, it is the max size */
 		deckSize = MAX_DECK_SIZE;
+		empty = false;
+		
 	}
-	
 	
 	
 	
@@ -114,6 +111,12 @@ public class Unodeck {
 	
 	
 //==================================================================================
+	
+	public void pushCard(Unocard c) {
+		
+		
+	}
+	
 	
 	
 	
