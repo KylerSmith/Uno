@@ -25,13 +25,14 @@ public class Player {
 //===================================================================
 	
 	public void displayHand() {
+		System.out.println("");
 		for (int i = 0; i < handSize; ++i) {
-			if (hand[i].value <= 5) {
+			if (hand[i].getValue() <= 5) {
 				/* displays the color and number if its a number card */
-				System.out.print("[ " + hand[i].color + " " + hand[i].value + " ] ");
+				System.out.print("[ " + hand[i].getColor() + " " + hand[i].getValue() + " ] ");
 			} else {
 				/* displays the color and the action if its an action card */
-				System.out.print("[ " + hand[i].color + " " + hand[i].action + " ] ");
+				System.out.print("[ " + hand[i].getColor() + " " + hand[i].getAction() + " ] ");
 			}
 		}
 		

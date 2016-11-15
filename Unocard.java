@@ -10,19 +10,48 @@ import java.util.Random;
 
 public class Unocard {
 	
-	public String color; // color of the card
-    public int value; // value of the card
+	private String color; // color of the card
+    private int value; // value of the card
     private Random randomNum;
-    public String action = null;
+    private String action = null;
     
     public Unocard(String pColor, int pValue) {
     	color = pColor;
     	value = pValue;
     }
-    
+   
     public Unocard() {
     	color = "black";
     	value = -1;
+    }
+    
+    
+    //=====================================================
+
+    // setters and getters
+    
+    public String getAction() {
+    	return action;
+    }
+    
+    public void setAction(String pAction) {
+    	action = pAction;
+    }
+    
+    public int getValue() {
+    	return value;
+    }
+    
+    public void setValue(int pValue) {
+    	value = pValue;
+    }
+    
+    public String getColor() {
+    	return color;
+    }
+    
+    public void setColor(String pColor) {
+    	color = pColor;
     }
 }
 

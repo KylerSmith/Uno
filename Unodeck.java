@@ -49,13 +49,17 @@ public class Unodeck {
 	//==================================================================================
 	
 	public void displayDeck() {
-		for (int i = 0; i < deckSize; ++i) {	
-			if ((deck[i].value <= 5) && (deckSize > 0)) {
+		System.out.println("");
+		for (int i = 0; i < deckSize; ++i) {
+			
+			System.out.print(i + ": ");
+			
+			if ((deck[i].getValue() <= 5) && (deckSize > 0)) {
 				/* displays the color and number if its a number card */
-				System.out.println(deck[i].color + " " + deck[i].value);
+				System.out.println(deck[i].getColor() + " " + deck[i].getValue());
 			} else {
 				/* displays the color and the action if its an action card */
-				System.out.println(deck[i].color + " " + deck[i].action);
+				System.out.println(deck[i].getColor() + " " + deck[i].getAction());
 			}	
 		}
 	}
@@ -85,37 +89,37 @@ public class Unodeck {
 			
 			/* chooses the color of the card */
 			if (colorInc >= 6) {
-				newCard.color = "yellow";
+				newCard.setColor("yellow");;
 			} else if (colorInc >= 4) {
-				newCard.color = "blue";
+				newCard.setColor("blue");
 			}else if (colorInc >= 2) {
-				newCard.color = "green";
+				newCard.setColor("green");
 			} else {
-				newCard.color = "red";
+				newCard.setColor("red");
 			}
 			
-			newCard.value = cardNum;
+			newCard.setValue(cardNum);
 			
 			/* If statements set the 2 wildcards */
 			if (i == deck.length - 2) {
-				newCard.value = 10;
-				newCard.color = "black";
-				newCard.action = "wild";
+				newCard.setValue(10);
+				newCard.setColor("black");
+				newCard.setAction("wild");
 			} 
 			if (i == deck.length - 1) {
-				newCard.value = 11;
-				newCard.color = "black";
-				newCard.action = "wild";
+				newCard.setValue(11);
+				newCard.setColor("black");
+				newCard.setAction("wild");
 			} 
 			
 			/* if the card is higher than a 5, set it's action */
-	    	if (newCard.value > 5) {
-	    		if (newCard.value == 6) {
-	    			newCard.action = "skip";
-	    		} else if (newCard.value == 7) {
-	    			newCard.action = "reverse";
-	    		} else if (newCard.value == 8) {
-	    			newCard.action = "draw two";
+	    	if (newCard.getValue() > 5) {
+	    		if (newCard.getValue() == 6) {
+	    			newCard.setAction("skip");
+	    		} else if (newCard.getValue() == 7) {
+	    			newCard.setAction("reverse");
+	    		} else if (newCard.getValue() == 8) {
+	    			newCard.setAction("draw two");
 	    		}
 	    	}
 			
@@ -143,9 +147,9 @@ public class Unodeck {
 			randCardPos = randomNum.nextInt(deck.length);
 			
 			/* algo to perform swap */
-				tmp.color = deck[randCardPos].color;
-				tmp.value = deck[randCardPos].value;
-				tmp.action = deck[randCardPos].action;
+				tmp.setColor(deck[randCardPos].getColor());
+				tmp.setValue(deck[randCardPos].getValue());
+				tmp.setAction(deck[randCardPos].getAction());
 				deck[randCardPos] = deck[0];
 				deck[0] = tmp;
 				++count;
