@@ -16,12 +16,34 @@ public class Unodeck {
 
 	Unocard[] deck = new Unocard[MAX_DECK_SIZE];
 	int deckSize = 0;
-	Unocard top = deck[deckSize];
-	boolean empty = true;
+	Unocard peekTop = deck[deckSize];
 	
 	
 	//==================================================================================
 
+	
+	public Unocard popCard() {
+		Unocard returnCard;
+		returnCard = deck[deckSize];
+		deckSize--;
+		return returnCard;
+	}
+	
+	//==================================================================================
+	
+	public void pushCard(Unocard c) {
+		
+		deck[deckSize] = c;
+		deckSize++;
+		
+	}
+		
+	
+	
+	//==================================================================================
+
+	
+	
 	
 	public void displayDeck() {
 		for (int i = 0; i < deck.length; ++i) {
@@ -81,7 +103,6 @@ public class Unodeck {
 		} // for loop end
 		/* after the deck is filled, it is the max size */
 		deckSize = MAX_DECK_SIZE;
-		empty = false;
 		
 	}
 	
@@ -110,13 +131,7 @@ public class Unodeck {
 		}
 	
 	
-//==================================================================================
-	
-	public void pushCard(Unocard c) {
-		
-		
-	}
-	
+
 	
 	
 	
