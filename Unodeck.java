@@ -16,15 +16,23 @@ public class Unodeck {
 
 	Unocard[] deck = new Unocard[MAX_DECK_SIZE];
 	int deckSize = 0;
-	Unocard peekTop = deck[deckSize];
 	
+	
+	
+	//==================================================================================
+
+	public Unocard peekCard() {
+		Unocard returnCard;
+		returnCard = deck[deckSize];
+		return returnCard;	
+	}
 	
 	//==================================================================================
 
 	
 	public Unocard popCard() {
 		Unocard returnCard;
-		returnCard = deck[deckSize];
+		returnCard = deck[deckSize - 1];
 		deckSize--;
 		return returnCard;
 	}
@@ -38,16 +46,17 @@ public class Unodeck {
 		
 	}
 		
-	
-	
 	//==================================================================================
-
-	
-	
 	
 	public void displayDeck() {
-		for (int i = 0; i < deck.length; ++i) {
-			System.out.println(deck[i].color + " " + deck[i].value);
+		for (int i = 0; i < deckSize; ++i) {	
+			if ((deck[i].value <= 5) && (deckSize > 0)) {
+				/* displays the color and number if its a number card */
+				System.out.println(deck[i].color + " " + deck[i].value);
+			} else {
+				/* displays the color and the action if its an action card */
+				System.out.println(deck[i].color + " " + deck[i].action);
+			}	
 		}
 	}
 	
@@ -58,7 +67,7 @@ public class Unodeck {
 		/* chooses the value of the cards */
 		int cardNum = 0; 
 		/* numOfEaColor will determine how many number cards we use */
-		int numOfEaColor = 9;
+		int numOfEaColor = 8;
 		/* color increment keeps track of what color to assign */
 		int colorInc = 0;
 
@@ -91,14 +100,26 @@ public class Unodeck {
 			if (i == deck.length - 2) {
 				newCard.value = 10;
 				newCard.color = "black";
+				newCard.action = "wild";
 			} 
 			if (i == deck.length - 1) {
 				newCard.value = 11;
 				newCard.color = "black";
+				newCard.action = "wild";
 			} 
 			
-			deck[i] = newCard;
+			/* if the card is higher than a 5, set it's action */
+	    	if (newCard.value > 5) {
+	    		if (newCard.value == 6) {
+	    			newCard.action = "skip";
+	    		} else if (newCard.value == 7) {
+	    			newCard.action = "reverse";
+	    		} else if (newCard.value == 8) {
+	    			newCard.action = "draw two";
+	    		}
+	    	}
 			
+			deck[i] = newCard;
 			++cardNum;
 		} // for loop end
 		/* after the deck is filled, it is the max size */
@@ -124,12 +145,15 @@ public class Unodeck {
 			/* algo to perform swap */
 				tmp.color = deck[randCardPos].color;
 				tmp.value = deck[randCardPos].value;
+				tmp.action = deck[randCardPos].action;
 				deck[randCardPos] = deck[0];
 				deck[0] = tmp;
 				++count;
 			}
 		}
 	
+	
+//==================================================================================
 	
 
 	

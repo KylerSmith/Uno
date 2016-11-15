@@ -13,6 +13,7 @@ public class Unocard {
 	public String color; // color of the card
     public int value; // value of the card
     private Random randomNum;
+    public String action = null;
     
     public Unocard(String pColor, int pValue) {
     	color = pColor;
@@ -21,7 +22,7 @@ public class Unocard {
     
     public Unocard() {
     	color = "black";
-    	value = 100;
+    	value = -1;
     }
 }
 
