@@ -38,7 +38,29 @@ public class Player {
 		
 	}
 	
-	
+//===================================================================
+	public int getHandSize(){
+		return handSize;
+	}
+	public String [] getCardsInHand(){
+		String [] cards = new String[handSize];
+		
+		for(int i = 0; i < handSize; i++){
+			
+			if (hand[i].getValue() <= 5) {
+				cards[i] = hand[i].getColor() + "," + hand[i].getValue();
+			} else {
+				cards[i] = hand[i].getColor() + "," + hand[i].getAction();
+			}
+			
+			
+			//System.out.println(cards[i]);
+			
+		}
+		
+		return cards;
+	}
+}	
 	
 	
 
