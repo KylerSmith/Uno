@@ -7,7 +7,7 @@ Player.java - Basicaly a console version of the game
 
 Unocard.java - The class that defines the cards
 
-Unodeck.java - Is a stack of Uno cards. There will be 2 instantiations of this class, draw deck and discard deck
+Unodeck.java - Is a stack of Uno cards. There will be 2 instantiations of this class, draw deck and discard deck (in Unoserver.java) 
 
 unocard_test.java - Built for testing purposes
 
