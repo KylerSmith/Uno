@@ -29,6 +29,8 @@ public class UNOPANEL extends JFrame {
 	private JPanel contentPane;
 	static boolean gameStarted = false;
 	Color theSelectedCardColor = Color.GRAY; 
+	JLabel topDiscardNumber = new JLabel("No Cards played");
+	String forDiscardTop;
 	/**
 	 * Launch the application.
 	 */
@@ -159,6 +161,7 @@ public class UNOPANEL extends JFrame {
 		topDiscardColor.setLayout(null);
 		
 		JLabel topDiscardNumber = new JLabel("No Cards played");
+		topDiscardNumber.setHorizontalAlignment(SwingConstants.CENTER);
 		topDiscardNumber.setBounds(29, 67, 103, 71);
 		topDiscardColor.add(topDiscardNumber);
 		
@@ -231,9 +234,10 @@ public class UNOPANEL extends JFrame {
 				
 		// Create Decks
 		Unodeck discard = new Unodeck(), playerDeck = new Unodeck();
-		discard.fillDeck();
+		//discard.fillDeck();
+		//discard.shuffleDeck();
 		playerDeck.fillDeck();
-				
+		playerDeck.shuffleDeck();	
 		// Create Players
 		Player frontPlayer = new Player(playerDeck);
 		Player otherPlayer = new Player(playerDeck);
@@ -266,6 +270,7 @@ public class UNOPANEL extends JFrame {
 								theSelectedcardPosition.setText("Card "+(i+1));
 								String thisCardNumber = thisCardProperties[1];
 								String thisCardColor = thisCardProperties[0];
+								forDiscardTop = thisCardNumber;
 								
 								if(thisCardColor.equals("yellow")){
 									theSelectedCardColor = Color.yellow;
@@ -303,9 +308,18 @@ public class UNOPANEL extends JFrame {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
+
 				
+				if(theSelectedCardColor.equals(Color.BLACK)){
+					
+					topDiscardNumber.setForeground(Color.WHITE);
+					
+				}else{
+					topDiscardNumber.setForeground(Color.BLACK);
+				}
+
 				topDiscardColor.setBackground(theSelectedCardColor);
-				
+				topDiscardNumber.setText(forDiscardTop);
 				
 			}
 			
