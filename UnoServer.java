@@ -106,11 +106,6 @@ public class UnoServer extends JFrame {
         
         outputToClient.writeUTF(discardDeck.peekCard().toString());
         
-
-  	  // rely the card data to the client deck for UI purposes
-        
-        
-        
         // Continuously serve the client
         while (true) {
         	// code that the server constantly runs. =================================
