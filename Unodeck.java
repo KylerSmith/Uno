@@ -22,8 +22,7 @@ public class Unodeck {
 	//==================================================================================
 
 	public Unocard peekCard() {
-		Unocard returnCard;
-		returnCard = deck[deckSize];
+		Unocard returnCard  = deck[0]; //deckSize - 1
 		return returnCard;	
 	}
 	
@@ -40,11 +39,15 @@ public class Unodeck {
 	//==================================================================================
 	
 	public void pushCard(Unocard c) {
-		
 		deck[deckSize] = c;
 		deckSize++;
-		
 	}
+	
+	//==================================================================================
+
+	
+	
+	
 		
 	//==================================================================================
 	
@@ -102,12 +105,12 @@ public class Unodeck {
 			
 			/* If statements set the 2 wildcards */
 			if (i == deck.length - 2) {
-				newCard.setValue(10);
+				newCard.setValue(9);
 				newCard.setColor("black");
 				newCard.setAction("wild");
 			} 
 			if (i == deck.length - 1) {
-				newCard.setValue(11);
+				newCard.setValue(10);
 				newCard.setColor("black");
 				newCard.setAction("wild");
 			} 

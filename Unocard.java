@@ -53,6 +53,17 @@ public class Unocard {
     public void setColor(String pColor) {
     	color = pColor;
     }
+    
+    public String toString() {
+    	
+    	if (value < 5) {
+    		return color + "," + value;
+    	} else {
+    		return color + "," + action;
+    	}
+    }
+    
+    
 }
 
 

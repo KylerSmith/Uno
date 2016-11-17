@@ -1,4 +1,4 @@
-package unofunc;
+package practice;
 
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
@@ -15,6 +15,10 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import java.awt.event.ActionListener;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.net.Socket;
 import java.awt.event.ActionEvent;
 import java.awt.Color;
 import javax.swing.JLayeredPane;
@@ -29,8 +33,9 @@ public class UNOPANEL extends JFrame {
 	private JPanel contentPane;
 	static boolean gameStarted = false;
 	Color theSelectedCardColor = Color.GRAY; 
-	JLabel topDiscardNumber = new JLabel("No Cards played");
-	String forDiscardTop;
+	private DataOutputStream toServer;
+	private DataInputStream fromServer;
+	String selectedCardNumber;
 	/**
 	 * Launch the application.
 	 */
@@ -51,6 +56,32 @@ public class UNOPANEL extends JFrame {
 	 * Create the frame.
 	 */
 	public UNOPANEL() {
+		
+		
+		
+		// -------------------------- CLIENT SETUP ------------------------------------------
+		
+				// KAS 11/11
+			    try {
+
+			        // Create a socket to connect to the server
+			        Socket socket = new Socket("localhost", 8000); // localhost
+
+			        // Socket socket = new Socket("98.167.208.37", 8000); // raspberrpi
+
+			        // Create an input stream to receive data from the server
+			        fromServer = new DataInputStream( socket.getInputStream() );
+
+			        // Create an output stream to send data to the server
+			        toServer =  new DataOutputStream( socket.getOutputStream() );
+			      }
+			      catch (IOException ex) {
+			        System.out.println(ex.toString());
+			      }	
+				
+		// ------------------------------------- END CLIENT SETUP ----------------------------------		
+		
+		
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 1066, 618);
 		contentPane = new JPanel();
@@ -86,7 +117,7 @@ public class UNOPANEL extends JFrame {
 				      System.out.println("No button clicked");
 				    } else if (response == JOptionPane.YES_OPTION) {
 				      
-				    	
+				    	System.exit(0);
 				    	
 				    } else if (response == JOptionPane.CLOSED_OPTION) {
 				      System.out.println("JOptionPane closed");
@@ -161,7 +192,6 @@ public class UNOPANEL extends JFrame {
 		topDiscardColor.setLayout(null);
 		
 		JLabel topDiscardNumber = new JLabel("No Cards played");
-		topDiscardNumber.setHorizontalAlignment(SwingConstants.CENTER);
 		topDiscardNumber.setBounds(29, 67, 103, 71);
 		topDiscardColor.add(topDiscardNumber);
 		
@@ -191,6 +221,10 @@ public class UNOPANEL extends JFrame {
 		
 		play.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e){
+				
+				
+				
+				
 				gameStarted = true;
 				play.setVisible(false);
 				panel.setVisible(false);
@@ -200,8 +234,7 @@ public class UNOPANEL extends JFrame {
 		});
 		
 		btnHelp.addActionListener(new ActionListener(){
-			public void actionPerformed(ActionEvent e) {
-				
+			public void actionPerformed(ActionEvent e) {	
 				panel.setVisible(false); // panel is green
 				panel_1.setVisible(true); //panel_1 is red
 				panel_2.setVisible(false);
@@ -232,95 +265,34 @@ public class UNOPANEL extends JFrame {
 		btnPlaythiscard.setBounds(490, 530, 117, 29);
 		panel_2.add(btnPlaythiscard);
 				
-		// Create Decks
-		Unodeck discard = new Unodeck(), playerDeck = new Unodeck();
-		//discard.fillDeck();
-		//discard.shuffleDeck();
-		playerDeck.fillDeck();
-		playerDeck.shuffleDeck();	
-		// Create Players
-		Player frontPlayer = new Player(playerDeck);
-		Player otherPlayer = new Player(playerDeck);
-				
-		// Set Slider
-		slider.setMaximum(otherPlayer.getHandSize());
+// logic ===========================================================		
 		
-		JLabel theSelectedcardPosition = new JLabel("New label");
-		theSelectedcardPosition.setHorizontalAlignment(SwingConstants.CENTER);
-		theSelectedcardPosition.setBounds(507, 472, 61, 16);
-		panel_2.add(theSelectedcardPosition);
-		frontPlayer.displayHand();
-				
-		slider.addChangeListener(new ChangeListener() {
-					@Override
-					public void stateChanged(ChangeEvent e) {
-						
-						String [] frontPlayerCards = frontPlayer.getCardsInHand();
-						String currentCardColor, currentCardNumber;
-						String [] colors = new String[frontPlayer.getHandSize()];
-						String [] numbers = new String[frontPlayer.getHandSize()];
-						String [] thisCardProperties = new String[2];
-						
-						for(int i = 0; i < frontPlayerCards.length; i++){
-							
-							thisCardProperties = frontPlayerCards[i].split(",");
-									
-							if(slider.getValue() == (i+1)){
-								
-								theSelectedcardPosition.setText("Card "+(i+1));
-								String thisCardNumber = thisCardProperties[1];
-								String thisCardColor = thisCardProperties[0];
-								forDiscardTop = thisCardNumber;
-								
-								if(thisCardColor.equals("yellow")){
-									theSelectedCardColor = Color.yellow;
-									selectedCardColor.setBackground(theSelectedCardColor);
-									selectedCardNumber.setForeground(Color.black);
-								}else if(thisCardColor.equals("black")){
-									theSelectedCardColor = Color.black;
-									selectedCardColor.setBackground(theSelectedCardColor);
-									selectedCardNumber.setForeground(Color.white);
-								}else if(thisCardColor.equals("blue")){
-									theSelectedCardColor = Color.blue;
-									selectedCardColor.setBackground(theSelectedCardColor);
-									selectedCardNumber.setForeground(Color.black);
-								}else if(thisCardColor.equals("green")){
-									theSelectedCardColor = Color.green;
-									selectedCardColor.setBackground(theSelectedCardColor);
-									selectedCardNumber.setForeground(Color.black);
-								}else if(thisCardColor.equals("red")){
-									theSelectedCardColor = Color.red;
-									selectedCardColor.setBackground(theSelectedCardColor);
-									selectedCardNumber.setForeground(Color.black);
-								}
-								
-								
-								selectedCardNumber.setText(thisCardNumber);
-								
-							}
-							
-						}
-						
-					}
-				    });
+		String firstStr = "";
+		String [] receivedCard = new String[2];
+		
+		try {
+			firstStr = fromServer.readUTF();
+		} catch (IOException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
+		}
+		 receivedCard = firstStr.split(",");
+		String cardColor = receivedCard[0];
+		String cardVal = receivedCard[1];
+		
+		initiateDiscard(cardColor, cardVal, topDiscardColor, topDiscardNumber);
+		
+		
+		
+
 		
 		btnPlaythiscard.addActionListener(new ActionListener(){
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-
 				
-				if(theSelectedCardColor.equals(Color.BLACK)){
-					
-					topDiscardNumber.setForeground(Color.WHITE);
-					
-				}else{
-					topDiscardNumber.setForeground(Color.BLACK);
-				}
 
 				topDiscardColor.setBackground(theSelectedCardColor);
-				topDiscardNumber.setText(forDiscardTop);
-				
 			}
 			
 		});
@@ -328,5 +300,28 @@ public class UNOPANEL extends JFrame {
 		
 		
 		
+	}
+	
+	
+	// Initiate Discard Deck
+	public void initiateDiscard(String color, String value, JPanel theCardBackground, JLabel theCardValue){
+		
+		if(color.equals("yellow")){
+			theCardBackground.setBackground(Color.yellow);
+			theCardValue.setForeground(Color.black);
+		}else if(color.equals("black")){
+			theCardBackground.setBackground(Color.black);
+			theCardValue.setForeground(Color.white);
+		}else if(color.equals("blue")){
+			theCardBackground.setBackground(Color.blue);
+			theCardValue.setForeground(Color.black);
+		}else if(color.equals("green")){
+			theCardBackground.setBackground(Color.green);
+			theCardValue.setForeground(Color.black);
+		}else if(color.equals("red")){
+			theCardBackground.setBackground(Color.red);
+			theCardValue.setForeground(Color.black);
+		}
+		theCardValue.setText(value);
 	}
 }
