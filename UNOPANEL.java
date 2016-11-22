@@ -36,6 +36,8 @@ public class UNOPANEL extends JFrame {
 	private DataOutputStream toServer;
 	private DataInputStream fromServer;
 	String selectedCardNumber;
+	String forHand = "";
+	public String [] theCardsInHand = new String[5];
 	/**
 	 * Launch the application.
 	 */
@@ -118,6 +120,12 @@ public class UNOPANEL extends JFrame {
 				    } else if (response == JOptionPane.YES_OPTION) {
 				      
 				    	System.exit(0);
+				    	try {
+							toServer.writeBoolean(false);
+						} catch (IOException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}
 				    	
 				    } else if (response == JOptionPane.CLOSED_OPTION) {
 				      System.out.println("JOptionPane closed");
@@ -204,7 +212,8 @@ public class UNOPANEL extends JFrame {
 		contentPane.add(panel);
 		panel.setLayout(null);
 		
-			JButton play = new JButton("Play");
+		
+			JButton play = new JButton("Play Game");
 			play.setBounds(389, 342, 287, 82);
 			
 			panel.add(play);
@@ -221,15 +230,55 @@ public class UNOPANEL extends JFrame {
 		
 		play.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e){
-				
-				
-				
-				
+			
 				gameStarted = true;
 				play.setVisible(false);
 				panel.setVisible(false);
 				panel_1.setVisible(false);
 				panel_2.setVisible(true);
+				
+				try {
+					forHand = fromServer.readUTF();
+					System.out.println(forHand);
+					theCardsInHand = initiatehand(forHand);
+					
+					for(int i = 0; i < theCardsInHand.length; i++){
+						
+						System.out.println(theCardsInHand[i]);
+						
+					}
+					
+					String [] middleCard = new String[2];
+					middleCard = theCardsInHand[2].split(",");
+					
+					selectedCardNumber.setText(middleCard[1]);
+					
+					if(middleCard[0].equals("yellow")){
+						theSelectedCardColor = Color.yellow;
+						selectedCardColor.setBackground(theSelectedCardColor);
+						selectedCardNumber.setForeground(Color.black);
+					}else if(middleCard[0].equals("black")){
+						theSelectedCardColor = Color.black;
+						selectedCardColor.setBackground(theSelectedCardColor);
+						selectedCardNumber.setForeground(Color.white);
+					}else if(middleCard[0].equals("blue")){
+						theSelectedCardColor = Color.blue;
+						selectedCardColor.setBackground(theSelectedCardColor);
+						selectedCardNumber.setForeground(Color.black);
+					}else if(middleCard[0].equals("green")){
+						theSelectedCardColor = Color.green;
+						selectedCardColor.setBackground(theSelectedCardColor);
+						selectedCardNumber.setForeground(Color.black);
+					}else if(middleCard[0].equals("red")){
+						theSelectedCardColor = Color.red;
+						selectedCardColor.setBackground(theSelectedCardColor);
+						selectedCardNumber.setForeground(Color.black);
+					}
+					
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 			}
 		});
 		
@@ -282,10 +331,6 @@ public class UNOPANEL extends JFrame {
 		
 		initiateDiscard(cardColor, cardVal, topDiscardColor, topDiscardNumber);
 		
-		
-		
-
-		
 		btnPlaythiscard.addActionListener(new ActionListener(){
 
 			@Override
@@ -293,11 +338,73 @@ public class UNOPANEL extends JFrame {
 				
 
 				topDiscardColor.setBackground(theSelectedCardColor);
+				
+				 try {
+					toServer.writeUTF("Start");
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 			}
 			
 		});
-		//  ******************************** GAME SCREEN COMPONENTS *************************************
 		
+		slider.setMaximum(theCardsInHand.length);
+		
+		slider.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				
+				String currentCardColor, currentCardNumber;
+				String [] colors = new String[theCardsInHand.length];
+				String [] numbers = new String[theCardsInHand.length];
+				String [] thisCardProperties = new String[2];
+				
+				for(int i = 0; i < theCardsInHand.length; i++){
+					
+					thisCardProperties = theCardsInHand[i].split(",");
+					
+					//System.out.println(thisCardProperties[0]+" "+thisCardProperties[1]);
+							
+					if(slider.getValue() == (i+1)){
+						
+						//theSelectedcardPosition.setText("Card "+(i+1));
+						String thisCardNumber = thisCardProperties[1];
+						String thisCardColor = thisCardProperties[0];
+						//forDiscardTop = thisCardNumber;
+						
+						if(thisCardColor.equals("yellow")){
+							theSelectedCardColor = Color.yellow;
+							selectedCardColor.setBackground(theSelectedCardColor);
+							selectedCardNumber.setForeground(Color.black);
+						}else if(thisCardColor.equals("black")){
+							theSelectedCardColor = Color.black;
+							selectedCardColor.setBackground(theSelectedCardColor);
+							selectedCardNumber.setForeground(Color.white);
+						}else if(thisCardColor.equals("blue")){
+							theSelectedCardColor = Color.blue;
+							selectedCardColor.setBackground(theSelectedCardColor);
+							selectedCardNumber.setForeground(Color.black);
+						}else if(thisCardColor.equals("green")){
+							theSelectedCardColor = Color.green;
+							selectedCardColor.setBackground(theSelectedCardColor);
+							selectedCardNumber.setForeground(Color.black);
+						}else if(thisCardColor.equals("red")){
+							theSelectedCardColor = Color.red;
+							selectedCardColor.setBackground(theSelectedCardColor);
+							selectedCardNumber.setForeground(Color.black);
+						}
+						
+						
+						selectedCardNumber.setText(thisCardNumber);
+						
+					}
+					
+				}
+				
+			}
+		    });
+		//  ******************************** GAME SCREEN COMPONENTS *************************************
 		
 		
 	}
@@ -323,5 +430,13 @@ public class UNOPANEL extends JFrame {
 			theCardValue.setForeground(Color.black);
 		}
 		theCardValue.setText(value);
+	}
+	
+	public String [] initiatehand(String theCardsInfo){
+		
+		String [] theHand = theCardsInfo.split(":");
+		
+		return theHand;
+		
 	}
 }
