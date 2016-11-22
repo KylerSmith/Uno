@@ -13,12 +13,7 @@ public class UnoServer extends JFrame {
   // Makes decks
   Unodeck drawDeck = new Unodeck(); 
   Unodeck discardDeck = new Unodeck();
-
-  
-  
-  
-  
-
+   
   public static void main(String[] args) {
     new UnoServer();
   }
@@ -83,7 +78,7 @@ public class UnoServer extends JFrame {
   class HandleAClient implements Runnable {
 
 	  
-	  public Player player1 = new Player(drawDeck);
+	  public Player player = new Player(drawDeck);
     private Socket socket; // A connected socket
 
     /** Construct a thread */
@@ -104,24 +99,17 @@ public class UnoServer extends JFrame {
         
         outputToClient.writeUTF(discardDeck.peekCard().toString());
         
-        outputToClient.writeUTF(discardDeck.peekCard().toString());
+        this.player.displayHand();
         
         // Continuously serve the client
         while (true) {
         	// code that the server constantly runs. =================================
         	
+        	outputToClient.writeUTF(this.player.sendCardsInHand(this.player.getCardsInHand()));
+        	
         	String clientInput = inputFromClient.readUTF();
         	
-        	
-        	
-        	
-        	
-        	
-
-        	
-        	
-        	
-        	
+        	System.out.println(clientInput);
         	
         	// jta.append(clientInput);
         
@@ -146,13 +134,3 @@ public class UnoServer extends JFrame {
 	  
 	  
   }
-  
-  
-  
-  
-  
-  
-  
-  
-  
-   
