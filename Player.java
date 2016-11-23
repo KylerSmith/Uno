@@ -1,4 +1,4 @@
-package practice;
+package UnoVersion_04;
 
 public class Player {
 	
@@ -6,6 +6,7 @@ public class Player {
 	int handSize = 0;
 	static int playerNum = 0;
 	String playerName;
+	static int playerTurn;
 	
 //===================================================================
 
@@ -57,21 +58,48 @@ public class Player {
 			//System.out.println(cards[i]);
 			
 		}
-		
 		return cards;
 	}
-	public String sendCardsInHand(String [] theCards){
-		
-		String CardsInHand = "";
-		
-		for(int i = 0; i < theCards.length; i++){
-			
-			CardsInHand+=theCards[i]+":";
-			
-		}
-		
-		return CardsInHand;
-		
-	}
-}
+
 	
+// ===================================================================
+	
+	public String sendCardsInHand(String [] theCards){
+		String CardsInHand = "";
+		for(int i = 0; i < theCards.length; i++){
+			CardsInHand+=theCards[i]+":";	
+		}
+		return CardsInHand;		
+	}
+	
+	
+// ==================================================================
+	public String getName(){
+		return playerName;
+	}
+	
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	
+	
+
+

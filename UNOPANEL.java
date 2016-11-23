@@ -1,4 +1,4 @@
-package practice;
+package UnoVersion_04;
 
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
@@ -32,12 +32,16 @@ public class UNOPANEL extends JFrame {
 
 	private JPanel contentPane;
 	static boolean gameStarted = false;
+	String selectedCardNumber;
 	Color theSelectedCardColor = Color.GRAY; 
 	private DataOutputStream toServer;
 	private DataInputStream fromServer;
-	String selectedCardNumber;
 	String forHand = "";
-	public String [] theCardsInHand = new String[5];
+	public String [] theCardsInHand = new String[20];
+	public String [] selectedCard = new String[2];
+	public int handSize = 5;
+	String inputFromServer = "";
+	
 	/**
 	 * Launch the application.
 	 */
@@ -155,11 +159,11 @@ public class UNOPANEL extends JFrame {
 		selectedCardNumber.setBounds(6, 54, 55, 43);
 		selectedCardColor.add(selectedCardNumber);
 		
-		JButton button = new JButton("Draw");
-		button.setForeground(UIManager.getColor("Button.light"));
-		button.setBackground(UIManager.getColor("Button.light"));
-		button.setBounds(799, 249, 159, 245);
-		panel_2.add(button);
+		JButton drawButton = new JButton("Draw");
+		drawButton.setForeground(UIManager.getColor("Button.light"));
+		drawButton.setBackground(UIManager.getColor("Button.light"));
+		drawButton.setBounds(799, 249, 159, 245);
+		panel_2.add(drawButton);
 		
 		JSlider slider = new JSlider();
 		slider.setMinimum(1);
@@ -188,7 +192,7 @@ public class UNOPANEL extends JFrame {
 		panel_7.setBounds(618, 343, 67, 146);
 		panel_2.add(panel_7);
 		
-		JLabel otherPlayerName = new JLabel("Player 2");
+		JLabel otherPlayerName = new JLabel("No player has joined...");
 		otherPlayerName.setIcon(new ImageIcon("/Users/TreyZor/Downloads/rsz_user.png"));
 		otherPlayerName.setBounds(419, 6, 201, 131);
 		panel_2.add(otherPlayerName);
@@ -228,6 +232,58 @@ public class UNOPANEL extends JFrame {
 		
 		panel_1.setVisible(false);
 		
+// ACTION LISTENERS ===============================================
+		
+		
+		// drawButton will act everytime a card is drawn.
+		drawButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				try {
+					
+					// display clients cards
+					for(int i = 0; i < handSize; ++i){
+						System.out.println(theCardsInHand[i]);
+					}
+					
+					// send signature to the server, letting them know the draw card button was pressed
+					toServer.writeUTF("draw pressed");
+				
+					String newHand = fromServer.readUTF();
+					System.out.println(newHand);
+					
+					// copy over the array from the server to the client
+					String [] h = newHand.split(":");
+					
+					++handSize;
+					for(int i = 0; i < handSize; i++){	
+						theCardsInHand[i] = h[i]; 
+					}
+					
+					
+										
+					// sets the slider
+					slider.setMaximum(handSize);
+					slider.setValue(handSize);
+										
+					System.out.println(handSize);
+					
+					// display clients cards
+					for(int i = 0; i < handSize; ++i){
+						System.out.println(theCardsInHand[i]);
+					}
+					
+					
+					
+					
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				} 
+			}
+		});
+
+// =============================================================
+		
+		// play goes to the panel with the game
 		play.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e){
 			
@@ -239,14 +295,13 @@ public class UNOPANEL extends JFrame {
 				
 				try {
 					forHand = fromServer.readUTF();
-					System.out.println(forHand);
+					System.out.println(forHand); // prints to the console the hand
 					theCardsInHand = initiatehand(forHand);
 					
-					for(int i = 0; i < theCardsInHand.length; i++){
-						
-						System.out.println(theCardsInHand[i]);
-						
-					}
+					// display cards to console
+//					for(int i = 0; i < handSize; i++){
+//						System.out.println(theCardsInHand[i]);
+//					}
 					
 					String [] middleCard = new String[2];
 					middleCard = theCardsInHand[2].split(",");
@@ -282,6 +337,9 @@ public class UNOPANEL extends JFrame {
 			}
 		});
 		
+		
+// =============================================================
+
 		btnHelp.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e) {	
 				panel.setVisible(false); // panel is green
@@ -290,6 +348,9 @@ public class UNOPANEL extends JFrame {
 				
 			}
 		});
+		
+// =============================================================
+
 		
 		btnGame.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -314,53 +375,92 @@ public class UNOPANEL extends JFrame {
 		btnPlaythiscard.setBounds(490, 530, 117, 29);
 		panel_2.add(btnPlaythiscard);
 				
-// logic ===========================================================		
+// display logic ===========================================================		
 		
 		String firstStr = "";
 		String [] receivedCard = new String[2];
 		
+		// read player name and print it out
 		try {
 			firstStr = fromServer.readUTF();
 		} catch (IOException e2) {
 			// TODO Auto-generated catch block
 			e2.printStackTrace();
 		}
-		 receivedCard = firstStr.split(",");
+		// set the other players name
+		otherPlayerName.setText(firstStr);
+
+		// gets the initial discard to display
+		try {
+			firstStr = fromServer.readUTF();
+		} catch (IOException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
+		}
+		receivedCard = firstStr.split(",");
 		String cardColor = receivedCard[0];
 		String cardVal = receivedCard[1];
 		
 		initiateDiscard(cardColor, cardVal, topDiscardColor, topDiscardNumber);
+		
 		
 		btnPlaythiscard.addActionListener(new ActionListener(){
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				
-
-				topDiscardColor.setBackground(theSelectedCardColor);
-				
 				 try {
-					toServer.writeUTF("Start");
+					 	
+					 	// send user selected card to server to check if it's valid
+					 	toServer.writeUTF("playedCard:"+selectedCard[0]+","+selectedCard[1]);
+					 	
+					 	// Get response from server
+						inputFromServer = fromServer.readUTF().toString();
+						
+						// If server response says invalid 
+						if(inputFromServer.equals("invalidMove")){
+							
+							//Invalid Card Error dialog
+							JOptionPane.showMessageDialog(null,
+							    "Please play a card that's either "+topDiscardNumber.getText()+" Or is "+getColorName(topDiscardColor.getBackground()),
+							    "Invalid Card",
+							    JOptionPane.ERROR_MESSAGE);
+							
+						// If server response says valid 
+						}else if(inputFromServer.equals("validMove")){
+							
+							try {
+								// Get the new Discard and show it on gui
+								String [] newDiscardTop = fromServer.readUTF().split(",");
+								
+								topDiscardColor.setBackground(getColor(newDiscardTop[0]));
+								topDiscardNumber.setText(newDiscardTop[1]);
+							} catch (IOException e2) {
+								// TODO Auto-generated catch block
+								e2.printStackTrace();
+							}
+						}
+				
+					
 				} catch (IOException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
 			}
-			
 		});
 		
-		slider.setMaximum(theCardsInHand.length);
+		slider.setMaximum(handSize);
 		
 		slider.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
 				
-				String currentCardColor, currentCardNumber;
-				String [] colors = new String[theCardsInHand.length];
-				String [] numbers = new String[theCardsInHand.length];
+//				String currentCardColor, currentCardNumber;
+//				String [] colors = new String[handSize];
+//				String [] numbers = new String[handSize];
 				String [] thisCardProperties = new String[2];
 				
-				for(int i = 0; i < theCardsInHand.length; i++){
+				for(int i = 0; i < handSize - 1; i++){
 					
 					thisCardProperties = theCardsInHand[i].split(",");
 					
@@ -371,7 +471,11 @@ public class UNOPANEL extends JFrame {
 						//theSelectedcardPosition.setText("Card "+(i+1));
 						String thisCardNumber = thisCardProperties[1];
 						String thisCardColor = thisCardProperties[0];
-						//forDiscardTop = thisCardNumber;
+						
+						// gives the selected card a value to check against
+						selectedCard[0] = thisCardColor;
+						selectedCard[1] = thisCardNumber;
+						
 						
 						if(thisCardColor.equals("yellow")){
 							theSelectedCardColor = Color.yellow;
@@ -432,11 +536,79 @@ public class UNOPANEL extends JFrame {
 		theCardValue.setText(value);
 	}
 	
+	// initiate hand
 	public String [] initiatehand(String theCardsInfo){
+
+		String [] forHands = new String[20];
 		
 		String [] theHand = theCardsInfo.split(":");
 		
-		return theHand;
+		for(int i = 0; i < handSize; i++){
+			forHands[i] = theHand[i]; 
+		}
+		
+		return forHands;
 		
 	}
+	
+	
+// ==========================================================
+	
+	
+	
+	public String getColorName(Color theColor){
+		
+		System.out.println(theColor);
+		
+		String colorName = "";
+		
+		if(theColor.equals(Color.GREEN)){
+			
+			colorName = "Green";
+			
+		}else if(theColor.equals(Color.YELLOW)){
+			
+			colorName = "Yellow";
+			
+		}else if(theColor.equals(Color.BLUE)){
+			
+			colorName = "Blue";
+			
+		}else if(theColor.equals(Color.BLACK)){
+			
+			colorName = "Black";
+			
+		}else if(theColor.equals(Color.RED)){
+			
+			colorName = "Red";
+			
+		}
+		
+		return colorName;
+	}
+	
+// ==========================================================
+
+	
+	public Color getColor(String thisCardColor){
+		
+		Color myColor = Color.GRAY;
+		
+		if(thisCardColor.equals("yellow")){
+			myColor = Color.yellow;;
+		}else if(thisCardColor.equals("black")){
+			myColor = Color.black;
+		}else if(thisCardColor.equals("blue")){
+			myColor = Color.blue;
+		}else if(thisCardColor.equals("green")){
+			myColor = Color.green;
+		}else if(thisCardColor.equals("red")){
+			myColor = Color.red;
+		}
+		
+		return myColor;
+	
+	
+	}
+	
 }

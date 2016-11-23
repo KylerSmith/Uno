@@ -1,12 +1,13 @@
-package practice;
+package UnoVersion_04;
 import java.util.Random;
 
-/*
- * If the card is a 10 it is a draw 2
- * If the card is an 11 it is a reverse
- * If the card is a 12 it is a skip
- * If the card is a 13 it is a wild card (did not include wild draw 4)
- * */
+/* cards 0-5
+ * 2 reverse (card # 6,7), 
+ * 2 draw two (card # 8, 9) 
+ * 2 skip of each color (card # 10, 11)
+ * and 2 wild (card # 12, 13)
+ * 98 cards total
+ */
 
 public class Unocard {
 	
@@ -15,11 +16,18 @@ public class Unocard {
     private Random randomNum;
     private String action = null;
     
+    // constructor to set number card
     public Unocard(String pColor, int pValue) {
     	color = pColor;
     	value = pValue;
     }
-   
+    // constructor to set action card
+    public Unocard(String pColor, String pAction) {
+    	color = pColor;
+    	action = pAction;
+    }
+    
+    // general constructor
     public Unocard() {
     	color = "black";
     	value = -1;
@@ -55,7 +63,6 @@ public class Unocard {
     }
     
     public String toString() {
-    	
     	if (value < 5) {
     		return color + "," + value;
     	} else {

@@ -1,4 +1,4 @@
-package practice;
+package UnoVersion_04;
 
 import java.util.Random;
 
@@ -18,11 +18,10 @@ public class Unodeck {
 	int deckSize = 0;
 	
 	
-	
 	//==================================================================================
 
 	public Unocard peekCard() {
-		Unocard returnCard  = deck[0]; //deckSize - 1
+		Unocard returnCard  = deck[deckSize - 1]; // deckSize - 1
 		return returnCard;	
 	}
 	
