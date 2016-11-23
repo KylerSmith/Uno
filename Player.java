@@ -60,8 +60,18 @@ public class Player {
 		
 		return cards;
 	}
+	public String sendCardsInHand(String [] theCards){
+		
+		String CardsInHand = "";
+		
+		for(int i = 0; i < theCards.length; i++){
+			
+			CardsInHand+=theCards[i]+":";
+			
+		}
+		
+		return CardsInHand;
+		
+	}
 }
 	
-	
-
-
