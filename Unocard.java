@@ -27,7 +27,7 @@ public class Unocard {
     	action = pAction;
     }
     
-    // general constructor
+    // General Constructor
     public Unocard() {
     	color = "black";
     	value = -1;
@@ -36,7 +36,7 @@ public class Unocard {
     
     //=====================================================
 
-    // setters and getters
+    // Setters and Getters
     
     public String getAction() {
     	return action;
@@ -70,9 +70,8 @@ public class Unocard {
     	}
     }
     
-    
-}
-
+} // End UnoCard Class
+//===================================================================
 
 
 

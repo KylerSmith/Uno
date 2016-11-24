@@ -1,16 +1,16 @@
-package practice;
+package UnoVersion_04;
 
 public class GameLogic {
 	
-	
-
-		
+	//=====================================================
+	// Start of Main
 	public static void main(String[] args) {	
 		
 		GameLogic gl = new GameLogic();
 		
 	}
-		
+	
+	// Define GameLogic Class
 	public GameLogic() {
 
 		/* make the draw and discard decks (as stacks) */
@@ -27,7 +27,6 @@ public class GameLogic {
 		/* display the players hands */
 		player1.displayHand();	
 		player2.displayHand();
-		
 		
 		/* Flip the first card from the draw deck to discard deck, if it is an action card */
 		discardDeck.pushCard(drawDeck.popCard());

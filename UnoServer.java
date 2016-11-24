@@ -7,6 +7,10 @@ import javax.swing.*;
 
 public class UnoServer extends JFrame {
 
+	
+  //=====================================================
+  // Variable Initialization
+	
   // Text area for displaying contents
   private JTextArea jta = new JTextArea();
   
@@ -15,12 +19,18 @@ public class UnoServer extends JFrame {
   Unodeck discardDeck = new Unodeck();
   
   // TRESOR - Variable to Hold top discard
+  // array variable to hold number and color
   public String [] discardTopCard = new String[2];
    
+  
+  //==========================================================================================================
+  // Start of main
   public static void main(String[] args) {
     new UnoServer();
   }
 
+  //=====================================================
+  // Define UnoServer 
   public UnoServer() {
 
 	  // fill the deck and shuffles the cards
@@ -71,30 +81,34 @@ public class UnoServer extends JFrame {
       System.err.println(ex);
     }
   }
-
+  
+  
+  //=====================================================
   // Inner class
   // Define the thread class for handling new connection
   class HandleAClient implements Runnable {
-
 	  
+	  // Declare and Initialize variables
 	  public Player player = new Player(drawDeck);
 	  private Socket socket; // A connected socket
 
-    /** Construct a thread */
+    /* Construct a thread */
 	  public HandleAClient(Socket socket) {
       this.socket = socket;
     }
 
-    /** Run a thread */
+    /* Run a thread */
     public void run() {
       try {
  
-        // Create data input and output streams
+        // Create data input and output streams for this thread
         DataInputStream inputFromClient = new DataInputStream(socket.getInputStream());
         DataOutputStream outputToClient = new DataOutputStream(socket.getOutputStream());
         
         // put the first card from the draw deck to the discard deck
         discardDeck.pushCard(drawDeck.popCard());
+        // Will this increment the discard every time a player logs into the server? - Kevin
+        
         
         // send the player name to the client
         outputToClient.writeUTF(this.player.playerName);

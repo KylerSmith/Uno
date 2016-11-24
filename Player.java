@@ -5,8 +5,8 @@ public class Player {
 	Unocard[] hand = new Unocard[20];
 	int handSize = 0;
 	static int playerNum = 0;
-	String playerName;
-	static int playerTurn;
+	String playerName; // Simply 'Player 1' or 'Player 2'
+	static int playerTurn; // If this is a 0, then it is player 2's turn, if it is a 1, then it is player 1's turn
 	
 //===================================================================
 
@@ -19,11 +19,11 @@ public class Player {
 			hand[handSize] = d.popCard();
 			++handSize;
 		}
-		
-		
 	}
 	
+	
 //===================================================================
+// Define methods
 	
 	public void displayHand() {
 		System.out.println("");
@@ -35,14 +35,17 @@ public class Player {
 				/* displays the color and the action if its an action card */
 				System.out.print("[ " + hand[i].getColor() + " " + hand[i].getAction() + " ] ");
 			}
-		}
-		
+		}	
 	}
 	
 // ===================================================================
+	
 	public int getHandSize(){
 		return handSize;
 	}
+
+// ===================================================================	
+	
 	public String [] getCardsInHand(){
 		String [] cards = new String[handSize];
 		
@@ -52,15 +55,11 @@ public class Player {
 				cards[i] = hand[i].getColor() + "," + hand[i].getValue();
 			} else {
 				cards[i] = hand[i].getColor() + "," + hand[i].getAction();
-			}
-			
-			
+			}		
 			//System.out.println(cards[i]);
-			
 		}
 		return cards;
 	}
-
 	
 // ===================================================================
 	
@@ -79,27 +78,4 @@ public class Player {
 	}
 	
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-	
-	
-
 
