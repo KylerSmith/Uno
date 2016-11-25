@@ -142,16 +142,16 @@ public class UNOPANEL extends JFrame {
 		btnGame.setBounds(0, 6, 64, 38);
 		contentPane.add(btnGame);
 		
-		JPanel panel_2 = new JPanel();
-		panel_2.setBackground(Color.LIGHT_GRAY);
-		panel_2.setBounds(0, 6, 1060, 584);
-		contentPane.add(panel_2);
-		panel_2.setLayout(null);
+		JPanel GameBoardPanel = new JPanel();
+		GameBoardPanel.setBackground(Color.LIGHT_GRAY);
+		GameBoardPanel.setBounds(0, 0, 1060, 584);
+		contentPane.add(GameBoardPanel);
+		GameBoardPanel.setLayout(null);
 		
 		JPanel selectedCardColor = new JPanel();
 		selectedCardColor.setBackground(Color.GREEN);
 		selectedCardColor.setBounds(507, 302, 67, 138);
-		panel_2.add(selectedCardColor);
+		GameBoardPanel.add(selectedCardColor);
 		selectedCardColor.setLayout(null);
 		
 		JLabel selectedCardNumber = new JLabel("New label");
@@ -163,74 +163,79 @@ public class UNOPANEL extends JFrame {
 		drawButton.setForeground(UIManager.getColor("Button.light"));
 		drawButton.setBackground(UIManager.getColor("Button.light"));
 		drawButton.setBounds(799, 249, 159, 245);
-		panel_2.add(drawButton);
+		GameBoardPanel.add(drawButton);
 		
 		JSlider slider = new JSlider();
 		slider.setMinimum(1);
 		slider.setMaximum(5);
 		slider.setValue(3);
 		slider.setBounds(449, 489, 190, 29);
-		panel_2.add(slider);
+		GameBoardPanel.add(slider);
 		
 		JPanel panel_3 = new JPanel();
 		panel_3.setBackground(Color.GRAY);
 		panel_3.setBounds(445, 322, 67, 138);
-		panel_2.add(panel_3);
+		GameBoardPanel.add(panel_3);
 		
 		JPanel panel_5 = new JPanel();
 		panel_5.setBackground(Color.GRAY);
 		panel_5.setBounds(564, 322, 61, 138);
-		panel_2.add(panel_5);
+		GameBoardPanel.add(panel_5);
 		
 		JPanel panel_6 = new JPanel();
 		panel_6.setBackground(Color.DARK_GRAY);
 		panel_6.setBounds(387, 343, 67, 146);
-		panel_2.add(panel_6);
+		GameBoardPanel.add(panel_6);
 		
 		JPanel panel_7 = new JPanel();
 		panel_7.setBackground(UIManager.getColor("Label.disabledShadow"));
 		panel_7.setBounds(618, 343, 67, 146);
-		panel_2.add(panel_7);
+		GameBoardPanel.add(panel_7);
 		
 		JLabel otherPlayerName = new JLabel("No player has joined...");
 		otherPlayerName.setIcon(new ImageIcon("/Users/TreyZor/Downloads/rsz_user.png"));
 		otherPlayerName.setBounds(419, 6, 201, 131);
-		panel_2.add(otherPlayerName);
+		GameBoardPanel.add(otherPlayerName);
 		
 		JPanel topDiscardColor = new JPanel();
 		topDiscardColor.setBackground(Color.GRAY);
 		topDiscardColor.setBounds(103, 249, 159, 245);
-		panel_2.add(topDiscardColor);
+		GameBoardPanel.add(topDiscardColor);
 		topDiscardColor.setLayout(null);
 		
 		JLabel topDiscardNumber = new JLabel("No Cards played");
 		topDiscardNumber.setBounds(29, 67, 103, 71);
 		topDiscardColor.add(topDiscardNumber);
 		
-		panel_2.setVisible(false);
+		GameBoardPanel.setVisible(false);
 	
-		JPanel panel = new JPanel();
-		panel.setBackground(new Color(0, 255, 0));
-		panel.setForeground(new Color(0, 255, 0));
-		panel.setBounds(0, 6, 1060, 584);
-		contentPane.add(panel);
-		panel.setLayout(null);
+		JPanel GameMenuPanel = new JPanel();
+		GameMenuPanel.setBackground(new Color(0, 255, 0));
+		GameMenuPanel.setForeground(new Color(0, 255, 0));
+		GameMenuPanel.setBounds(0, 0, 1060, 584);
+		contentPane.add(GameMenuPanel);
+		GameMenuPanel.setLayout(null);
 		
 		
 			JButton play = new JButton("Play Game");
 			play.setBounds(389, 342, 287, 82);
 			
-			panel.add(play);
+			GameMenuPanel.add(play);
 			
-			panel.setVisible(true);
+			JLabel GameMenuLabel = new JLabel("New label");
+			GameMenuLabel.setIcon(new ImageIcon("C:\\Class\\SER215\\Project\\Pics\\UI\\GameMenu.jpg"));
+			GameMenuLabel.setBounds(0, 0, 1060, 590);
+			GameMenuPanel.add(GameMenuLabel);
+			
+			GameMenuPanel.setVisible(true);
 		
-		JPanel panel_1 = new JPanel();
-		panel_1.setForeground(Color.GREEN);
-		panel_1.setBackground(new Color(255, 69, 0));
-		panel_1.setBounds(0, 6, 1060, 584);
-		contentPane.add(panel_1);
+		JPanel HelpPanel = new JPanel();
+		HelpPanel.setForeground(Color.GREEN);
+		HelpPanel.setBackground(new Color(255, 69, 0));
+		HelpPanel.setBounds(0, 0, 1060, 584);
+		contentPane.add(HelpPanel);
 		
-		panel_1.setVisible(false);
+		HelpPanel.setVisible(false);
 		
 // ACTION LISTENERS ===============================================
 		
@@ -289,9 +294,9 @@ public class UNOPANEL extends JFrame {
 			
 				gameStarted = true;
 				play.setVisible(false);
-				panel.setVisible(false);
-				panel_1.setVisible(false);
-				panel_2.setVisible(true);
+				GameMenuPanel.setVisible(false);
+				HelpPanel.setVisible(false);
+				GameBoardPanel.setVisible(true);
 				
 				try {
 					forHand = fromServer.readUTF();
@@ -342,9 +347,9 @@ public class UNOPANEL extends JFrame {
 
 		btnHelp.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e) {	
-				panel.setVisible(false); // panel is green
-				panel_1.setVisible(true); //panel_1 is red
-				panel_2.setVisible(false);
+				GameMenuPanel.setVisible(false); // panel is green
+				HelpPanel.setVisible(true); //panel_1 is red
+				GameBoardPanel.setVisible(false);
 				
 			}
 		});
@@ -355,25 +360,25 @@ public class UNOPANEL extends JFrame {
 		btnGame.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 	
-				panel_1.setVisible(false); //panel_1 is red
+				HelpPanel.setVisible(false); //panel_1 is red
 				
 				if(gameStarted){
-					panel.setVisible(false);
-					panel_2.setVisible(true); // panel_2 is blue
+					GameMenuPanel.setVisible(false);
+					GameBoardPanel.setVisible(true); // panel_2 is blue
 				}else{
-					panel.setVisible(true); // panel is green
-					panel_2.setVisible(false);
+					GameMenuPanel.setVisible(true); // panel is green
+					GameBoardPanel.setVisible(false);
 				}
 			}
 		});
 		
 		JLabel otherPlayerhandSize = new JLabel("handSize");
 		otherPlayerhandSize.setBounds(451, 102, 61, 16);
-		panel_2.add(otherPlayerhandSize);
+		GameBoardPanel.add(otherPlayerhandSize);
 						
 		JButton btnPlaythiscard = new JButton("PlayThisCard");
 		btnPlaythiscard.setBounds(490, 530, 117, 29);
-		panel_2.add(btnPlaythiscard);
+		GameBoardPanel.add(btnPlaythiscard);
 				
 // display logic ===========================================================		
 		
@@ -450,6 +455,11 @@ public class UNOPANEL extends JFrame {
 		});
 		
 		slider.setMaximum(handSize);
+		
+		JLabel BackgroundLabel = new JLabel("New label");
+		BackgroundLabel.setIcon(new ImageIcon("C:\\Class\\SER215\\Project\\Pics\\UI\\background.jpg"));
+		BackgroundLabel.setBounds(0, 0, 1060, 590);
+		GameBoardPanel.add(BackgroundLabel);
 		
 		slider.addChangeListener(new ChangeListener() {
 			@Override
