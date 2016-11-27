@@ -1,4 +1,4 @@
-package UnoVersion_04;
+package practice;
 
 import java.util.Random;
 
@@ -133,8 +133,6 @@ public class Unodeck {
 		
 	}
 	
-	
-	
 //==================================================================================
 /* function that shuffles all of the cards */
 	public void shuffleDeck() {
@@ -156,13 +154,19 @@ public class Unodeck {
 				deck[0] = tmp;
 				++count;
 			}
-		}
-	
+		}	
 	
 //==================================================================================
-	
-
-	
+	public void validateStart(){
+	    boolean flag = false;
+	    while (!flag) { 
+	    	if (deck[deckSize - 1].getValue() > 5) { // If an action card, shuffle
+	    		//System.out.println("Initial value = " + deck[deckSize - 1].getValue());
+	    		shuffleDeck();
+	    		//System.out.println("After shuffle value = " + deck[deckSize - 1].getValue());
+	        } else flag = true; 					// else exit 
+	    }
+	}
 	
 	
 }
