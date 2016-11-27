@@ -1,4 +1,4 @@
-package UnoVersion_05;
+package practice;
 import java.io.*;
 import java.net.*;
 import javax.swing.*;
@@ -233,9 +233,13 @@ class HandleASession implements Runnable, UnoConstants
 		public void sendInitialData(DataOutputStream player, String opponentName, int opponentHandSize, String topDiscard, String playerHand) {
 			try {
 				player.writeUTF(opponentName);
+				player.flush();
 				player.writeInt(opponentHandSize);
+				player.flush();
 				player.writeUTF(topDiscard);
+				player.flush();
 				player.writeUTF(playerHand);
+				player.flush();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

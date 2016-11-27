@@ -209,10 +209,14 @@ public class UnopanelNewTwo extends JFrame {
 		GameMenuPanel.setLayout(null);
 		
 		
+			JButton connect = new JButton("Find a game");
+			connect.setBounds(389, 342, 287, 82);
+		
 			JButton play = new JButton("Play Game");
-			play.setBounds(389, 342, 287, 82);
+			play.setBounds(389, 342, 287, 82);		
 			
-			GameMenuPanel.add(play);
+			GameMenuPanel.add(connect);		
+			
 			
 			JLabel GameMenuLabel = new JLabel("New label");
 			GameMenuLabel.setIcon(new ImageIcon("C:\\Class\\SER215\\Project\\Pics\\UI\\GameMenu.jpg"));
@@ -266,8 +270,39 @@ public class UnopanelNewTwo extends JFrame {
 					      }
 					    // -------------------------
 						// Get initial data
-					    //receiveInitialData();
+					    receiveInitialData();
 					    //parseInitialData();
+					    
+					    
+					    
+					}
+				});
+				
+// =============================================================
+				
+				// play goes to the panel with the game
+				connect.addActionListener(new ActionListener() {
+					public void actionPerformed(ActionEvent e){
+					
+						// ------ Connect to server -----------
+					    try {
+
+					        // Create a socket to connect to the server
+					        Socket socket = new Socket(host, port); // localhost:8000
+
+					        // Create IO streams to input/output data from the server
+					        fromServer = new DataInputStream(socket.getInputStream());
+					        toServer =  new DataOutputStream(socket.getOutputStream() );
+					      }
+					      catch (IOException ex) {
+					        System.out.println(ex.toString());
+					      }
+					    // -------------------------
+					    
+						connect.setVisible(false);
+						GameMenuPanel.add(play);
+						play.setVisible(true);
+						
 					    
 					    
 					    
@@ -495,9 +530,18 @@ public class UnopanelNewTwo extends JFrame {
 			
 			public void receiveInitialData() {
 				try {
+					System.out.println("1st receive");
 					opponentName = fromServer.readUTF();
+					System.out.println(opponentName + "<<< opponent name");
+					
+					System.out.println("2nd receive");
 					playerCardCount = fromServer.readInt();
+					System.out.println(playerCardCount + "<<< Card count");
+					
+					System.out.println("3rd receive");
 					topDiscardCard = fromServer.readUTF();
+					
+					System.out.println("4th receive");
 					playersHand = fromServer.readUTF();
 					
 				} catch (IOException ex){
