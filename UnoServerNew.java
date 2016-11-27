@@ -1,4 +1,4 @@
-package UnoVersion_04;
+package UnoVersion_05;
 import java.io.*;
 import java.net.*;
 import javax.swing.*;
@@ -108,9 +108,7 @@ class HandleASession implements Runnable, UnoConstants
 			private DataOutputStream toPlayer1;
 			private DataInputStream fromPlayer2;
 			private DataOutputStream toPlayer2;
-		
-		// Continue to play?? Not needed
-			
+					
 		// Construct a thread
 		public HandleASession(Socket player1, Socket player2) {
 			this.player1socket = player1;
@@ -124,9 +122,7 @@ class HandleASession implements Runnable, UnoConstants
 		// Implement the run() method for the thread ===============
 		public void run() {
 			try {
-				
-				
-				
+
 				System.out.println("runfilldeck");
 				drawDeck.fillDeck();
 				drawDeck.shuffleDeck();
@@ -143,7 +139,6 @@ class HandleASession implements Runnable, UnoConstants
 				DataOutputStream toPlayer2 = new DataOutputStream(player2socket.getOutputStream());;;
 				
 				
-				/*
 				 toPlayer1.writeUTF(player1.playerName); // send player1 name to client
 				 toPlayer1.flush();
 				 
@@ -155,7 +150,13 @@ class HandleASession implements Runnable, UnoConstants
 				 
 				 toPlayer2.writeUTF("It's Player 1's turn. Please wait."); // send message to client
 				 toPlayer2.flush();
-				*/
+				 
+				 
+				 // send initial data
+				 sendInitialData(toPlayer1, player2.playerName, player2.handSize, 
+						 		discardDeck.peekCard().toString(), player1.getCardsInHand().toString());
+				 
+				
 				 // Continuously serve the players and determine and report
 				 while(true){ 
 					 // Game logic functions and methods here
@@ -228,7 +229,19 @@ class HandleASession implements Runnable, UnoConstants
 			return false;
 		}
 		
-
+		public void sendInitialData(DataOutputStream player, String opponentName, int opponentHandSize, String topDiscard, String playerHand) {
+			try {
+				player.writeUTF(opponentName);
+				player.writeInt(opponentHandSize);
+				player.writeUTF(topDiscard);
+				player.writeUTF(playerHand);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
+		
 		
 		/* private void sendMove(DataOutputStream out, int row, int column)
       	 *		throws IOException {
