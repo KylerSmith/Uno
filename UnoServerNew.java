@@ -151,10 +151,11 @@ class HandleASession implements Runnable, UnoConstants
 				 toPlayer2.writeUTF("It's Player 1's turn. Please wait."); // send message to client
 				 toPlayer2.flush();
 				 
-				 
 				 // send initial data
 				 sendInitialData(toPlayer1, player2.playerName, player2.handSize, 
 						 		discardDeck.peekCard().toString(), player1.getCardsInHand().toString());
+				 sendInitialData(toPlayer2, player1.playerName, player1.handSize, 
+					 		discardDeck.peekCard().toString(), player2.getCardsInHand().toString());
 				 
 				
 				 // Continuously serve the players and determine and report
