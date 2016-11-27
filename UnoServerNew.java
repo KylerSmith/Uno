@@ -1,23 +1,27 @@
-package practice;
+package UnoVersion_04;
 import java.io.*;
 import java.net.*;
 import javax.swing.*;
+
 import java.awt.*;
 import java.util.*;
 
-public class UnoServerNew extends JFrame
-						  implements UnoConstants {
+public class UnoServerNew extends JFrame implements UnoConstants
+{
+	//INITS
+	private int port = 8000;
 	// Start of Main ===============================================
-	public static void main(String[] args){
+	public static void main(String[] args)
+	{
 		UnoServerNew frame = new UnoServerNew();
 	}
 	// End of Main =================================================
 	
 	// Define UnoServerNew =========================================
-	public UnoServerNew() {
-		private JTextArea jta = new JTextArea();
+	public UnoServerNew() 
+	{
 		
-		
+		JTextArea jta = new JTextArea();
 			
 		// Create GUI for server ===================================
 		// Place text area on the frame
@@ -29,31 +33,61 @@ public class UnoServerNew extends JFrame
 	    setVisible(true); // It is necessary to show the frame here!
 		
 		// Try-Catch block
-	    try {
-	    	/* Create a server socket
-	    	 * Number a session
-	    	 * Ready to create a session for every 2 players
-	    	 * 	While loop
-	    	 * Connect Player 1
-	    	 * Notify that the player is Player 1
-	    	 * Connect to Player 2
-	    	 * Notify that the player is Player 2
-	    	 * Display this session and increment session number
-	    	 * Create a new thread for this session of 2 players
-	    	 * Start a new thread
-	    	 */
-	    	
-	    } catch(IOException e){
+	    try 
+	    { 	
+			// Create a server socket//
+			ServerSocket serverSocket = new ServerSocket(port);
+			// Session ID
+			int sessionNo=1;
+			// Ready to create a session for every 2 players
+			while (true) {
+			    jta.append(new Date() +
+			      ": Wait for players to join session " + sessionNo + '\n');
+			 // Connect Player 1
+			Socket player1 = serverSocket.accept(); 
+			jta.append(new Date() + ": Player 1 joined session " +
+			        sessionNo + '\n');
+			jta.append("Player 1's IP address" +
+			player1.getInetAddress().getHostAddress() + '\n');
+			// Notify that the player is Player 1
+			    new DataOutputStream(
+			    player1.getOutputStream()).writeInt(PLAYER1);
+			
+			// Connect to player 2
+			Socket player2 = serverSocket.accept();
+			
+			jta.append(new Date() +
+			": Player 2 joined session " + sessionNo + '\n');
+			jta.append("Player 2's IP address" +
+			player2.getInetAddress().getHostAddress() + '\n');
+			
+			// Notify that the player is Player 2
+			new DataOutputStream(
+			player2.getOutputStream()).writeInt(PLAYER2);
+			
+			// Display this session and increment session number
+			jta.append(new Date() + ": Start a thread for session " +
+			sessionNo++ + '\n');
+			
+			// Create a new thread for this session of two players
+			HandleASession task = new HandleASession(player1, player2);
+			
+			// Start the new thread
+			new Thread(task).start();
+	    	}
+	    } 
+	    catch(IOException e)
+	    {
 	    	System.err.println(e);
 	    }
 	}
 }
 
-class HandleASession implements Runnable, UnoConstants {
+class HandleASession implements Runnable, UnoConstants 
+{
 	private Socket player1socket;
 	private Socket player2socket;
-	
-	
+		
 	// Instantiation ===========================================
 		// Public 
 			public String [] discardTopCard = new String[2]; // hold value and color of top discard card
@@ -65,9 +99,9 @@ class HandleASession implements Runnable, UnoConstants {
 			// Instantiate decks
 			Unodeck drawDeck = new Unodeck(); 
 			Unodeck discardDeck = new Unodeck();	
-			// Instantiate Players
-			public Player player1 = new Player(drawDeck);
-			public Player player2 = new Player(drawDeck);
+			// Declare Players
+			public Player player1;//= new Player(drawDeck);
+			public Player player2;// = new Player(drawDeck);
 		
 		// Data Streams declaration
 			private DataInputStream fromPlayer1;
@@ -79,9 +113,10 @@ class HandleASession implements Runnable, UnoConstants {
 			
 		// Construct a thread
 		public HandleASession(Socket player1, Socket player2) {
-			this.player1socket = player1socket;
-			this.player2socket = player2socket;
+			this.player1socket = player1;
+			this.player2socket = player2;
 			
+		System.out.println("Thread created");	
 			// Initialize hands
 		} // End HandleASession Definition
 		
@@ -90,6 +125,17 @@ class HandleASession implements Runnable, UnoConstants {
 		public void run() {
 			try {
 				
+				
+				
+				System.out.println("runfilldeck");
+				drawDeck.fillDeck();
+				drawDeck.shuffleDeck();
+				
+				player1= new Player(drawDeck);
+				player2= new Player(drawDeck);
+				drawDeck.validateStart();
+				discardDeck.pushCard(drawDeck.popCard());
+				
 				// Create data input and output streams
 				DataInputStream fromPlayer1 = new DataInputStream(player1socket.getInputStream());
 				DataOutputStream toPlayer1 = new DataOutputStream(player1socket.getOutputStream());;
@@ -97,6 +143,7 @@ class HandleASession implements Runnable, UnoConstants {
 				DataOutputStream toPlayer2 = new DataOutputStream(player2socket.getOutputStream());;;
 				
 				
+				/*
 				 toPlayer1.writeUTF(player1.playerName); // send player1 name to client
 				 toPlayer1.flush();
 				 
@@ -108,7 +155,7 @@ class HandleASession implements Runnable, UnoConstants {
 				 
 				 toPlayer2.writeUTF("It's Player 1's turn. Please wait."); // send message to client
 				 toPlayer2.flush();
-
+				*/
 				 // Continuously serve the players and determine and report
 				 while(true){ 
 					 // Game logic functions and methods here
@@ -191,6 +238,3 @@ class HandleASession implements Runnable, UnoConstants {
 		 * 
 		 */	
 }
-
-
-
