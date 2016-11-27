@@ -1,4 +1,4 @@
-package UnoVersion_05;
+package practice;
 
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
@@ -50,6 +50,14 @@ public class UnopanelNewTwo extends JFrame {
 	// Jframe 
 	private JPanel contentPane;
 	
+	
+	// Runtime variables
+	// Initiation variables
+	String opponentName;
+	int playerCardCount;
+	String topDiscardCard;
+	String playersHand;
+	
 	// Start of Main ===============================================
 	public static void main(String[] args){
 		EventQueue.invokeLater(new Runnable() {
@@ -67,21 +75,6 @@ public class UnopanelNewTwo extends JFrame {
 	// Create the frame ============================================
 	public UnopanelNewTwo() {
 		
-		
-		// ------ Connect to server
-	    try {
-
-	        // Create a socket to connect to the server
-	        Socket socket = new Socket(host, port); // localhost:8000
-
-	        // Create IO streams to input/output data from the server
-	        fromServer = new DataInputStream(socket.getInputStream());
-	        toServer =  new DataOutputStream(socket.getOutputStream() );
-	      }
-	      catch (IOException ex) {
-	        System.out.println(ex.toString());
-	      }
-	    // -------------------------
 	    
 	    setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 1066, 618);
@@ -257,6 +250,27 @@ public class UnopanelNewTwo extends JFrame {
 						GameMenuPanel.setVisible(false);
 						HelpPanel.setVisible(false);
 						GameBoardPanel.setVisible(true);
+						
+						// ------ Connect to server -----------
+					    try {
+
+					        // Create a socket to connect to the server
+					        Socket socket = new Socket(host, port); // localhost:8000
+
+					        // Create IO streams to input/output data from the server
+					        fromServer = new DataInputStream(socket.getInputStream());
+					        toServer =  new DataOutputStream(socket.getOutputStream() );
+					      }
+					      catch (IOException ex) {
+					        System.out.println(ex.toString());
+					      }
+					    // -------------------------
+						// Get initial data
+					    //receiveInitialData();
+					    //parseInitialData();
+					    
+					    
+					    
 					}
 				});
 				
@@ -477,6 +491,37 @@ public class UnopanelNewTwo extends JFrame {
 				return myColor;
 			}
 			
+		// ==========================================================	
+			
+			public void receiveInitialData() {
+				try {
+					opponentName = fromServer.readUTF();
+					playerCardCount = fromServer.readInt();
+					topDiscardCard = fromServer.readUTF();
+					playersHand = fromServer.readUTF();
+					
+				} catch (IOException ex){
+					System.err.println(ex);
+				}	
+			}
+			
+			public void parseInitialData() {
+				// opponentName is fine
+				// playerCardCount is fine
+				String [] discardTopCard = new String[2]; // hold value and color of top discard card
+				discardTopCard = topDiscardCard.split(",");
+				
+				String [] initialHand = new String[5];
+				initialHand = playersHand.split(":");
+				
+				//color,value:color,value:color,value
+			}
+			
+			// Opposite Player name			x UTF
+		    // Opposite player card count	x INT
+		    // top Discard Card				x UTF
+		    // Player playersHand			x UTF (will be parsed differently)
+			
 	public void run() 
 	{
 		/*
@@ -539,13 +584,3 @@ public class UnopanelNewTwo extends JFrame {
 	
 	
 }
-
-
-
-
-
-
-
-
-
-
