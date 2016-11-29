@@ -320,6 +320,16 @@ class HandleASession implements Runnable, UnoConstants
 		
 //============================================================
 
+private void sendPlay(DataOutputStream toOpponent, Unodeck discardDeck) throws IOException {
+
+	// if opponent played card, sent to the player
+	System.out.println("Send this card to the client: " + discardDeck.peekCard().toString());
+	toOpponent.writeUTF(discardDeck.peekCard().toString());
+
+}
+		
+//============================================================
+
 		
 		private boolean isEmpty() {
 			// Check to see if Draw Deck is empty, if it is, then pop all cards
