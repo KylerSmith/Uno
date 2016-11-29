@@ -149,13 +149,11 @@ class HandleASession implements Runnable, UnoConstants
 				
 				 // Continuously serve the players and determine and report
 				 while(true){ 
-				 
-					 // get index from player 1, remove card from player's hand,
-					 // update both clients of card change
+					 
+					 // get the index from the client
 					 getPlay(player1, player2, fromPlayer1, toPlayer1, discardDeck); // int indexReceived = fromPlayer1.readInt();
-					 			 
-					 //changeTurn();
-					 // send that it is player two's turn
+
+					 //sendPlay(player2, player1);
 					 
 					 
 					 
@@ -251,67 +249,67 @@ class HandleASession implements Runnable, UnoConstants
 		
 		
 		
-//============================================================
 
 //============================================================
+
+		private void sendPlay(Player player, Player opponent, DataOutputStream toOpponent, 
+				Unodeck discardDeck) throws IOException {
+			
+			toOpponent.writeUTF(discardDeck.peekCard().toString());
+			
+		}
+
 		
+		
+		
+//============================================================
+
 		// Get the move/play from a player
 		
 		private void getPlay(Player player, Player opponent, DataInputStream fromPlayer, DataOutputStream toPlayer, Unodeck discardDeck) throws IOException {
 			
-			// Send data to client - Card passed should go onto the top of discard
-			int indexReceived = fromPlayer.readInt();
-			// push that card from player's hand to the discardDeck
-			discardDeck.pushCard(player1.hand[indexReceived]);
-			// Send Data function will:
-			// Send player hand ========================================
-			try {
-				toPlayer.writeUTF(player.sendCardsInHand(player.getCardsInHand())); // Send the new hand
-				toPlayer.flush();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			int check = fromPlayer.readInt();
+			
+			if (check == PLAYCARD) {
+			
+				// Send data to client - Card passed should go onto the top of discard
+				int indexReceived = fromPlayer.readInt();
+				// push that card from player's hand to the discardDeck
+				discardDeck.pushCard(player1.hand[indexReceived]);
+				// Send Data function will:
+				// Send player hand ========================================
+				try {
+					toPlayer.writeUTF(player.sendCardsInHand(player.getCardsInHand())); // Send the new hand
+					toPlayer.flush();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				// send top discard
+				// send the first discard to the client
+				try {
+					toPlayer.writeUTF(discardDeck.peekCard().toString());
+					toPlayer.flush();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+				// send opponent handSize
+				/*try {
+					toPlayer.writeInt(opponent.getHandSize());
+					toPlayer.flush();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}	
+				*/
+			
 			}
-			// send top discard
-			// send the first discard to the client
-			try {
-				toPlayer.writeUTF(discardDeck.peekCard().toString());
-				toPlayer.flush();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			
-			// send opponent handSize
-			/*try {
-				toPlayer.writeInt(opponent.getHandSize());
-				toPlayer.flush();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}	
-			*/
-			
-			
 			// Opponent handsize is playerObject.handSize;
 		}
-		
-//============================================================
-		
-//============================================================
 
-		
-		
 
-		// Send the move/play to the other player functions
-		
-		private void sendPlay(DataOutputStream output, String color, int value) throws IOException {
-			// Send data to client - Card passed should go onto the top of discard
-			output.writeUTF(color);
-			output.writeUTF(Integer.toString(value));
-			output.flush();
-		}
-		
 //============================================================
 
 		
