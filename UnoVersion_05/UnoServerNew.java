@@ -149,18 +149,13 @@ class HandleASession implements Runnable, UnoConstants
 				
 				 // Continuously serve the players and determine and report
 				 while(true){ 
-					 
-					 // get index from player 1
-					 int indexReceived = fromPlayer1.readInt();
-					 // push that card from player's hand to the discardDeck
-					 discardDeck.pushCard(player1.hand[indexReceived]);
-					 // remove card from player's hand
-
+				 
+					 // get index from player 1, remove card from player's hand,
 					 // update both clients of card change
-					 
+					 getPlay(player1, player2, fromPlayer1, toPlayer1, discardDeck); // int indexReceived = fromPlayer1.readInt();
+					 			 
+					 //changeTurn();
 					 // send that it is player two's turn
-					 
-					 
 					 
 					 
 					 
@@ -258,7 +253,50 @@ class HandleASession implements Runnable, UnoConstants
 		
 //============================================================
 
+//============================================================
 		
+		// Get the move/play from a player
+		
+		private void getPlay(Player player, Player opponent, DataInputStream fromPlayer, DataOutputStream toPlayer, Unodeck discardDeck) throws IOException {
+			
+			// Send data to client - Card passed should go onto the top of discard
+			int indexReceived = fromPlayer.readInt();
+			// push that card from player's hand to the discardDeck
+			discardDeck.pushCard(player1.hand[indexReceived]);
+			// Send Data function will:
+			// Send player hand ========================================
+			try {
+				toPlayer.writeUTF(player.sendCardsInHand(player.getCardsInHand())); // Send the new hand
+				toPlayer.flush();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			// send top discard
+			// send the first discard to the client
+			try {
+				toPlayer.writeUTF(discardDeck.peekCard().toString());
+				toPlayer.flush();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			// send opponent handSize
+			/*try {
+				toPlayer.writeInt(opponent.getHandSize());
+				toPlayer.flush();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}	
+			*/
+			
+			
+			// Opponent handsize is playerObject.handSize;
+		}
+		
+//============================================================
 		
 //============================================================
 
