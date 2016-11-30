@@ -71,26 +71,41 @@ public class Player {
 		return CardsInHand;		
 	}
 	
+	
 // ===================================================================
-/** update the handSize to have the index passed go away */
-public void updateHandAfterPlay(int indexToRemove){ 
-
-	Unocard[] newHand = new Unocard[handSize - 2]; // remove one card for the play
-	for (int i = 0; i < hand.length; ++i) {
-		if (i == (handSize - 1)) {
-			// break if the handSize is equal to index
-			break; 
-		} else if (i >= indexToRemove) {
-			newHand[i] = hand[i+1]; // put the next card from hand into the new hand
+	/** update the handSize to have the index passed go away */
+	public void updateHandAfterPlay(int indexToRemove){ 
+		
+		Unocard[] newHand = new Unocard[20]; // remove one card for the play
+		for (int i = 0; i < handSize; ++i) {
+			if (i == (handSize - 1)) {
+				// break if the handSize is equal to index
+				break; 
+			} else if (i >= indexToRemove) {
+				newHand[i] = hand[i+1]; // put the next card from hand into the new hand
+			} else {
+				newHand[i] = hand[i];
+			}
 		}
+		
+		--handSize;
+		
+		for (int i = 0; i < handSize; ++i) {
+			hand[i] = newHand[i];
+		}
+		
+		
 	}
+	
+// ===================================================================
 
-	--handSize;
+	public void updateHandAfterDraw() { 
+		
+		Unocard[] newHand = new Unocard[hand.length - 2]; 
 
-	for (int i = 0; i < hand.length; ++i) {
-		hand[i] = newHand[i];
 	}
-}
+	
+	
 // ==================================================================
 	public String getName(){
 		return playerName;

@@ -93,7 +93,8 @@ class HandleASession implements Runnable, UnoConstants
 	public String [] discardTopCard = new String[2]; 
 		
 		// Private
-			// None
+	// the turn should switch between 1 and 2 to see who's turn it is
+			private int turn = 1;
 			
 		// Objects
 
@@ -150,10 +151,9 @@ class HandleASession implements Runnable, UnoConstants
 				 // Continuously serve the players and determine and report
 				 while(true){ 
 					 
-					 // get the index from the client
-					 getPlay(player1, player2, fromPlayer1, toPlayer1, discardDeck); // int indexReceived = fromPlayer1.readInt();
-
-					 //sendPlay(player2, player1);
+					 // get the play from player1
+					 getPlay(player1, player2, fromPlayer1, toPlayer1, discardDeck, toPlayer2);
+					
 					 
 					 
 					 
@@ -252,9 +252,11 @@ class HandleASession implements Runnable, UnoConstants
 
 //============================================================
 
-		private void sendPlay(Player player, Player opponent, DataOutputStream toOpponent, 
-				Unodeck discardDeck) throws IOException {
+		private void sendPlay(DataOutputStream toOpponent, Unodeck discardDeck) throws IOException {
 			
+			// if opponent played card, sent to the player
+			System.out.println("");
+			System.out.println("Send this card to the client: " + discardDeck.peekCard().toString());
 			toOpponent.writeUTF(discardDeck.peekCard().toString());
 			
 		}
@@ -266,7 +268,7 @@ class HandleASession implements Runnable, UnoConstants
 
 		// Get the move/play from a player
 		
-		private void getPlay(Player player, Player opponent, DataInputStream fromPlayer, DataOutputStream toPlayer, Unodeck discardDeck) throws IOException {
+		private void getPlay(Player player, Player opponent, DataInputStream fromPlayer, DataOutputStream toPlayer, Unodeck discardDeck, DataOutputStream toOpponent)  throws IOException {
 			
 			int check = fromPlayer.readInt();
 			
@@ -274,10 +276,17 @@ class HandleASession implements Runnable, UnoConstants
 			
 				// Send data to client - Card passed should go onto the top of discard
 				int indexReceived = fromPlayer.readInt();
+											
 				// push that card from player's hand to the discardDeck
 				discardDeck.pushCard(player1.hand[indexReceived]);
-				// Send Data function will:
-				// Send player hand ========================================
+				
+				// take the card out of the server hand
+				player1.updateHandAfterPlay(indexReceived);
+								
+				
+				
+				
+				// Send new player hand ========================================
 				try {
 					toPlayer.writeUTF(player.sendCardsInHand(player.getCardsInHand())); // Send the new hand
 					toPlayer.flush();
@@ -285,7 +294,8 @@ class HandleASession implements Runnable, UnoConstants
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				// send top discard
+				
+				
 				// send the first discard to the client
 				try {
 					toPlayer.writeUTF(discardDeck.peekCard().toString());
@@ -294,6 +304,10 @@ class HandleASession implements Runnable, UnoConstants
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
+				
+				
+				
+				sendPlay(toOpponent, discardDeck);
 				
 				// send opponent handSize
 				/*try {
@@ -304,41 +318,13 @@ class HandleASession implements Runnable, UnoConstants
 					e.printStackTrace();
 				}	
 				*/
-			
+			} else if (check == DRAW) {
+				// TODO: if the player presses the draw button
 			}
-			// Opponent handsize is playerObject.handSize;
+
+			
+			
 		}
-
-
-//============================================================
-
-		
-		private boolean checkWin() {
-			// If the players handSize == 0, then they won!
-			return false;
-		}
-		
-//============================================================
-
-private void sendPlay(DataOutputStream toOpponent, Unodeck discardDeck) throws IOException {
-
-	// if opponent played card, sent to the player
-	System.out.println("Send this card to the client: " + discardDeck.peekCard().toString());
-	toOpponent.writeUTF(discardDeck.peekCard().toString());
-
-}
-		
-//============================================================
-
-		
-		private boolean isEmpty() {
-			// Check to see if Draw Deck is empty, if it is, then pop all cards
-			// from discard to draw and shuffle
-			return false;
-		}
-
-
-		
 
 //============================================================
 		

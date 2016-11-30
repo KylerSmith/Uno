@@ -278,6 +278,7 @@ public class UnopanelNewTwo extends JFrame implements UnoConstants {
 					    
 						// this is the code that runs until there is a winner!
 						try {
+							// update the players about whats happening
 							run();
 						} catch (IOException e1) {
 							// TODO Auto-generated catch block
@@ -309,7 +310,7 @@ public class UnopanelNewTwo extends JFrame implements UnoConstants {
 					      }
 				// -----------------------------------------------------------------
 
-					    receiveInitialData(otherPlayerName, otherPlayerhandSize);
+					    receiveInitialData(otherPlayerName, otherPlayerhandSize, btnPlaythiscard, drawButton);
 
 					    // find a game button disappears, play button appears -GUI-
 						connect.setVisible(false);
@@ -358,7 +359,7 @@ public class UnopanelNewTwo extends JFrame implements UnoConstants {
 						validatePlay(currentSelectedCard, topDiscardCard);
 						if (isValidPlay) {
 							// send the index of the choosen card to the server to evaluate which card to play
-							sendPlay(slider.getValue() - 1);
+							sendPlay(slider.getValue() - 1, slider, playersHand, btnPlaythiscard, drawButton);
 						} else {
 							//Invalid Card Error dialog
 							String [] e1 = topDiscardCard.split(",");
@@ -390,14 +391,89 @@ public class UnopanelNewTwo extends JFrame implements UnoConstants {
 					}
 				});	
 				
+				
+				
+
+				
+				
+				
+				
 			} // end constructor
+	
+	
+	//3245435243857698324873264587632784657893264873426457823465
+	
+	
+	// run function
+	public void run() throws IOException, InterruptedException  {
+				
+		System.out.println("RUN FUNCTION!");
+		
+		
+		
+		
+		
+		
+
+		
+		
+		
+		
+		// if you are player1, it should be your turn
+
+		// if you are player2, you should wait for player1's move
+		
+		
+		/*
+		 * Get player name from server						X DONE in recieve data
+		 * Determine if you are player 1 or player 2		X DONE in recieve data
+		 * - if player 2, myTurn = false;					X Client checks turn		
+		 * - else myTurn = true;							^^^
+		 * Wait for another player to join
+		 * After other player has joined, continue to play
+		 * Player 1:
+		 * 		Play or Draw
+		 * 		Send move to Server
+		 * 			Can send 2 types
+		 * 			- Play
+		 * 				- Send card to server
+		 * 			- Draw
+		 * 				- Draw will receive data
+		 * 		Wait for data from Server
+		 * 			Data will come standard every time
+		 * 			- Status of game (win or lose)
+		 * 			- boolean true or false to determine turn
+		 * 			- Number of cards in opponents hand
+		 * 			- Top card on discard
+		 * Player 2:
+		 * 		Wait for data from Server
+		 * 			Data will come standard every time
+		 * 			- Status of game (win or lose)
+		 * 			- boolean true or false to determine turn
+		 * 			- Number of cards in opponents hand
+		 * 			- Top card on discard
+		 * 			
+		 * 		Play or Draw
+		 * 		Send move to Server
+		 * 			Can send 2 types
+		 * 			- Play
+		 * 				- Send card to server
+		 * 			- Draw
+		 * 				- Draw will receive data
+		 */
+	}
+	
+	
+	//2343675834765897362489763298274682791648792364873645345
+	
+	
 	
 			
 // ==========================================================	
 			
 	// recieve all the initial values from the server
 	
-			public void receiveInitialData(JLabel pOtherPlayerName, JLabel pOtherPlayerhandSize) {
+			public void receiveInitialData(JLabel pOtherPlayerName, JLabel pOtherPlayerhandSize, JButton btnPlay, JButton draw) {
 				 // set the player to the player number they are
 			    try {
 					player = fromServer.readInt();
@@ -405,9 +481,12 @@ public class UnopanelNewTwo extends JFrame implements UnoConstants {
 				    if (player == PLAYER1) {
 				    	pOtherPlayerName.setText("Player 2");
 				    	myTurn = true; // set the first turn to player 1
+
 				    } else {
 				    	pOtherPlayerName.setText("Player 1");
 				    	myTurn = false; // set the first turn to player1
+						btnPlay.setEnabled(myTurn);
+						draw.setEnabled(myTurn);
 				    }
 				} catch (IOException e1) {
 					// TODO Auto-generated catch block
@@ -473,79 +552,85 @@ public class UnopanelNewTwo extends JFrame implements UnoConstants {
 			isValidPlay = false;
 		}
 	}
+
 	
-	private void playOrDraw() {
-		// whichever player will be able to play or draw a card
-	}
 	
-	private boolean checkPlay(Unocard playedCard){
-		// If card is a wild, matches number, or color, return true
-		// If it does not meet above requirements, show error message
-		return false;
-	}
-	
+//================================================================================	
+
 	// sends card information to the Server
-	private void sendPlay(int index) {
+	private void sendPlay(int index, JSlider slider, String hand, JButton btnPlay, JButton draw) {
+		// send over that play button was pressed
+		try {
+			toServer.writeInt(PLAYCARD);
+		} catch (IOException e) {
+			e.printStackTrace();
+		} 
+		
 		// sends the index of the card in the hand to the server
 		try {
 			System.out.println("index sent: " + index);
 			toServer.writeInt(index);
 		} catch (IOException e) {
 			e.printStackTrace();
-		} 		
+		} 	
+		
+		
 	}
 	
 
 	
-	// run function
-	public void run() throws IOException, InterruptedException  {
+//================================================================================	
+
+	
+
+	//================================================================================	
+	
+		/** update the slider, and the hand to have one less card */
+		private void updateAfterPlay(JSlider slider, String hand, JButton btnPlay, JButton draw) {
+			
+			if (myTurn == true) {
+				// new hand recieved from the server in the form color,val:color,val: ... etc.
+				try {
+					hand = fromServer.readUTF();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				// recieve newDiscard
+				try {
+					topDiscardCard = fromServer.readUTF();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+
 				
-		System.out.println("RUN FUNCTION!");
-		
-		
+			} else if (myTurn == false) {
+				try {
+					topDiscardCard = fromServer.readUTF();
+					System.out.println("Opponent played: ");
 
-		
-		
-		
-		/*
-		 * Get player name from server						X DONE in recieve data
-		 * Determine if you are player 1 or player 2		X DONE in recieve data
-		 * - if player 2, myTurn = false;					X Client checks turn		
-		 * - else myTurn = true;							^^^
-		 * Wait for another player to join
-		 * After other player has joined, continue to play
-		 * Player 1:
-		 * 		Play or Draw
-		 * 		Send move to Server
-		 * 			Can send 2 types
-		 * 			- Play
-		 * 				- Send card to server
-		 * 			- Draw
-		 * 				- Draw will receive data
-		 * 		Wait for data from Server
-		 * 			Data will come standard every time
-		 * 			- Status of game (win or lose)
-		 * 			- boolean true or false to determine turn
-		 * 			- Number of cards in opponents hand
-		 * 			- Top card on discard
-		 * Player 2:
-		 * 		Wait for data from Server
-		 * 			Data will come standard every time
-		 * 			- Status of game (win or lose)
-		 * 			- boolean true or false to determine turn
-		 * 			- Number of cards in opponents hand
-		 * 			- Top card on discard
-		 * 			
-		 * 		Play or Draw
-		 * 		Send move to Server
-		 * 			Can send 2 types
-		 * 			- Play
-		 * 				- Send card to server
-		 * 			- Draw
-		 * 				- Draw will receive data
-		 */
-	}
-	
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			// opponentsHandSize
+//			try {
+//				hand = fromServer.readUTF();
+//			} catch (IOException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+
+			 // update the slider size
+			slider.setMaximum(slider.getMaximum() - 1);
+			myTurn = !myTurn;
+			// switch the button enable
+			btnPlay.setEnabled(myTurn);
+			draw.setEnabled(myTurn);
+			
+		}
 	
 	
 }
