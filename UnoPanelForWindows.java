@@ -179,7 +179,9 @@ public class UnoPanelForWindows extends JFrame implements UnoConstants {
 				
 				GameBoardPanel.setVisible(false);	
 				// Add play button to GameMenuPanel
+				GameMenuPanel.add(connect);
 				GameMenuPanel.add(play);	
+				play.setVisible(false);
 				GameMenuPanel.setVisible(true);
 				HelpPanel.setVisible(false);
 		
@@ -350,7 +352,8 @@ public class UnoPanelForWindows extends JFrame implements UnoConstants {
 					playersHand = fromServer.readUTF();
 					System.out.println("Cards read from server: " + playersHand);
 					slider.setMaximum(slider.getMaximum()+1);
-					myTurn=false;
+					drawButton.setEnabled(false);
+					btnPlaythiscard.setEnabled(false);
 					}
 				catch(IOException ex)
 				{
@@ -370,10 +373,7 @@ public class UnoPanelForWindows extends JFrame implements UnoConstants {
 				GameMenuPanel.setVisible(false);
 				HelpPanel.setVisible(false);
 				GameBoardPanel.setVisible(true);
-				try {
-					forHand = fromServer.readUTF();
-					System.out.println(forHand); // prints to the console the hand
-					
+				
 					
 					String [] middleCard = new String[2];
 					middleCard = theCardsInHand[2].split(",");
@@ -401,10 +401,8 @@ public class UnoPanelForWindows extends JFrame implements UnoConstants {
 						selectedCardColor.setBackground(theSelectedCardColor);
 						selectedCardNumber.setForeground(Color.black);
 					}
-				} catch (IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
+				
+				
 			}
 		});		
 		
@@ -426,7 +424,8 @@ public class UnoPanelForWindows extends JFrame implements UnoConstants {
 			      }
 			    // -----------------------------------------------------------------
 
-			    receiveInitialData(otherPlayerName, otherPlayerhandSize, btnPlaythiscard, drawButton);
+			    receiveInitialData(otherPlayerName, otherPlayerhandSize,
+			    		btnPlaythiscard, drawButton);
 
 			    // find a game button disappears, play button appears -GUI-
 				connect.setVisible(false);
@@ -499,13 +498,17 @@ public class UnoPanelForWindows extends JFrame implements UnoConstants {
 	
 // Begin defining functions ==========================================================	
 	
-	public void receiveInitialData(JLabel pOtherPlayerName, JLabel pOtherPlayerhandSize, JButton btnPlay, JButton draw) {
+	public void receiveInitialData(JLabel pOtherPlayerName, JLabel pOtherPlayerhandSize,
+			JButton btnPlay, JButton draw) {
 		 // set the player to the player number they are
 	    try {
+	    	System.out.println("Waiting for player");
 			player = fromServer.readInt();
 		    // set the opponents label according to who started first
 		    if (player == PLAYER1) {
 		    	pOtherPlayerName.setText("Player 2");
+		    	draw.setEnabled(true);
+		    	btnPlay.setEnabled(true);
 		    	myTurn = true; // set the first turn to player 1
 		    } else {
 		    	pOtherPlayerName.setText("Player 1");
@@ -516,7 +519,7 @@ public class UnoPanelForWindows extends JFrame implements UnoConstants {
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		}
-	
+		
 	    // set the card amount for opponent from the server
 	    try {
 	    	opponentCardCount = fromServer.readInt();

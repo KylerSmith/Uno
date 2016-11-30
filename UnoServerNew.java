@@ -85,7 +85,6 @@ class HandleASession implements Runnable, UnoConstants
 {
 	private Socket player1socket;
 	private Socket player2socket;
-	boolean game=true;
 		
 	// Instantiation ===========================================
 		// Public 
@@ -143,20 +142,21 @@ class HandleASession implements Runnable, UnoConstants
 				
 				
 				sendInitial(fromPlayer1, toPlayer1, player2.getHandSize(), discardDeck.peekCard().toString(), 
-							player1.sendCardsInHand(player1.getCardsInHand()));
+							player1.sendCardsInHand(player1.getCardsInHand()), 1);
 				sendInitial(fromPlayer2, toPlayer2, player1.getHandSize(), discardDeck.peekCard().toString(), 
-							player2.sendCardsInHand(player2.getCardsInHand()));
+							player2.sendCardsInHand(player2.getCardsInHand()), 2);
 				
 				
 				
 				 // Continuously serve the players and determine and report
 				 
-				 while(game){ 
+				 while(true){ 
 					 
 					 // get the index from the client
 					 getPlay(player1, player2, fromPlayer1, toPlayer1, drawDeck, discardDeck); // int indexReceived = fromPlayer1.readInt();
 					 //send play from above to player 2
 					 sendPlay(toPlayer2,discardDeck);
+					 
 					 
 					 
 					 
@@ -174,7 +174,7 @@ class HandleASession implements Runnable, UnoConstants
 					  * 	- False = continue
 					  * Check if deck is empty
 					  * 	- True = shuffle
-					  * 	- False = continue
+					  * 	- False = continue XXX DONE XXX 
 					  * Let player 2 know it is his/her turn
 					  * 	- Send a boolean value
 					  * Send player 1's move to player 2
@@ -194,7 +194,7 @@ class HandleASession implements Runnable, UnoConstants
 					  * 	- False = continue
 					  * Check if deck is empty
 					  * 	- True = shuffle
-					  * 	- False = continue
+					  * 	- False = continue XXX DONE XXX
 					  * Let player 1 know it is his/her turn
 					  * 	- Send a boolean value
 					  * Send player 2's move to player 2
@@ -218,8 +218,17 @@ class HandleASession implements Runnable, UnoConstants
 
 		// test KAS 11/27
 		public void sendInitial(DataInputStream fromPlayer, DataOutputStream toPlayer, int opponentCardAmt,
-								String firstDiscard, String playerHand) {
+								String firstDiscard, String playerHand, int playerNum) {
 
+			/*// send opponent card amount
+			try {
+				toPlayer.writeInt(playerNum);
+				toPlayer.flush();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			*/
 			// send opponent card amount
 			try {
 				toPlayer.writeInt(opponentCardAmt);
@@ -318,11 +327,11 @@ class HandleASession implements Runnable, UnoConstants
 			}
 			if (check==PLAYER1_WON)
 			{
-				game=false;
+				
 			}
 			if (check==PLAYER2_WON)
 			{
-				game=false;
+				
 			}
 			//toPlayer.writeBoolean(false);
 			// Opponent handsize is playerObject.handSize;
@@ -334,22 +343,20 @@ class HandleASession implements Runnable, UnoConstants
 
 		
 		private boolean checkWin() {
-			// If the players handSize == 0, then they won!
-			return false;
+			return(player1.getHandSize()==0); 
+			
 		}
 		
 //============================================================
-
 		
-		private boolean isEmpty() {
+		private boolean isEmpty(Unodeck drawDeck) {
+			
+			return(drawDeck.getDeckSize()==0);
 			// Check to see if Draw Deck is empty, if it is, then pop all cards
 			// from discard to draw and shuffle
-			return false;
+			
 		}
-
-
 		
-
 //============================================================
 		
 		
