@@ -1,4 +1,6 @@
-package UnoVersion_04;
+package UnoVersion_05;
+
+import javax.swing.JSlider;
 
 public class Player {
 	
@@ -50,7 +52,6 @@ public class Player {
 		String [] cards = new String[handSize];
 		
 		for(int i = 0; i < handSize; i++){
-			
 			if (hand[i].getValue() <= 5) {
 				cards[i] = hand[i].getColor() + "," + hand[i].getValue();
 			} else {
@@ -58,6 +59,7 @@ public class Player {
 			}		
 			//System.out.println(cards[i]);
 		}
+		
 		return cards;
 	}
 	
@@ -71,11 +73,54 @@ public class Player {
 		return CardsInHand;		
 	}
 	
+// ===================================================================
+/** update the handSize to have the index passed go away */
+public void updateHandAfterPlay(int indexToRemove){ 
+
+	Unocard[] newHand = new Unocard[handSize - 2]; // remove one card for the play
+	for (int i = 0; i < hand.length; ++i) {
+		if (i == (handSize - 1)) {
+			// break if the handSize is equal to index
+			break; 
+		} else if (i >= indexToRemove) {
+			newHand[i] = hand[i+1]; // put the next card from hand into the new hand
+		}
+	}
+
+	--handSize;
+
+	for (int i = 0; i < hand.length; ++i) {
+		hand[i] = newHand[i];
+	}
+}
+
+public void updateHandAfterDraw(Unocard drawnCard)
+{ 
 	
+	
+	hand[handSize] = drawnCard;
+	++handSize;
+	
+	
+	
+}
 // ==================================================================
 	public String getName(){
 		return playerName;
 	}
 	
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
 

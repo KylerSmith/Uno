@@ -1,4 +1,4 @@
-package practice;
+package UnoVersion_05;
 import java.io.*;
 import java.net.*;
 import javax.swing.*;
@@ -6,8 +6,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.*;
 
-public class UnoServerNew extends JFrame implements UnoConstants
-{
+public class UnoServerNew extends JFrame implements UnoConstants {
 	//INITS
 	private int port = 8000;
 	// Start of Main ===============================================
@@ -18,8 +17,7 @@ public class UnoServerNew extends JFrame implements UnoConstants
 	// End of Main =================================================
 	
 	// Define UnoServerNew =========================================
-	public UnoServerNew() 
-	{
+	public UnoServerNew() {
 		
 		JTextArea jta = new JTextArea();
 			
@@ -33,8 +31,7 @@ public class UnoServerNew extends JFrame implements UnoConstants
 	    setVisible(true); // It is necessary to show the frame here!
 		
 		// Try-Catch block
-	    try 
-	    { 	
+	    try { 	
 			// Create a server socket//
 			ServerSocket serverSocket = new ServerSocket(port);
 			// Session ID
@@ -43,17 +40,19 @@ public class UnoServerNew extends JFrame implements UnoConstants
 			while (true) {
 			    jta.append(new Date() +
 			      ": Wait for players to join session " + sessionNo + '\n');
-			 // Connect Player 1
+			    
+// Connect Player 1 ===========================================
 			Socket player1 = serverSocket.accept(); 
 			jta.append(new Date() + ": Player 1 joined session " +
 			        sessionNo + '\n');
 			jta.append("Player 1's IP address" +
 			player1.getInetAddress().getHostAddress() + '\n');
+			
 			// Notify that the player is Player 1
 			    new DataOutputStream(
 			    player1.getOutputStream()).writeInt(PLAYER1);
 			
-			// Connect to player 2
+// Connect to player 2 ===========================================
 			Socket player2 = serverSocket.accept();
 			
 			jta.append(new Date() +
@@ -65,19 +64,18 @@ public class UnoServerNew extends JFrame implements UnoConstants
 			new DataOutputStream(
 			player2.getOutputStream()).writeInt(PLAYER2);
 			
-			// Display this session and increment session number
+			
+// Display this session and increment session number ===============
 			jta.append(new Date() + ": Start a thread for session " +
 			sessionNo++ + '\n');
 			
 			// Create a new thread for this session of two players
 			HandleASession task = new HandleASession(player1, player2);
-			
 			// Start the new thread
 			new Thread(task).start();
 	    	}
 	    } 
-	    catch(IOException e)
-	    {
+	    catch(IOException e) {
 	    	System.err.println(e);
 	    }
 	}
@@ -87,86 +85,90 @@ class HandleASession implements Runnable, UnoConstants
 {
 	private Socket player1socket;
 	private Socket player2socket;
+	boolean game=true;
 		
 	// Instantiation ===========================================
 		// Public 
-			public String [] discardTopCard = new String[2]; // hold value and color of top discard card
+	
+	// hold value and color of top discard card
+	public String [] discardTopCard = new String[2]; 
 		
 		// Private
 			// None
 			
 		// Objects
-			// Instantiate decks
-			Unodeck drawDeck = new Unodeck(); 
-			Unodeck discardDeck = new Unodeck();	
-			// Declare Players
-			public Player player1;//= new Player(drawDeck);
-			public Player player2;// = new Player(drawDeck);
+
+		// Declare Players
+		public Player player1; // new Player(drawDeck);
+		public Player player2; // new Player(drawDeck);
 		
-		// Data Streams declaration
-			private DataInputStream fromPlayer1;
-			private DataOutputStream toPlayer1;
-			private DataInputStream fromPlayer2;
-			private DataOutputStream toPlayer2;
-					
+		
 		// Construct a thread
 		public HandleASession(Socket player1, Socket player2) {
 			this.player1socket = player1;
 			this.player2socket = player2;
 			
-		System.out.println("Thread created");	
+			System.out.println("Thread created");	
+			
 			// Initialize hands
+			
+			
 		} // End HandleASession Definition
 		
 		
 		// Implement the run() method for the thread ===============
 		public void run() {
 			try {
+				
+				
+				// Instantiate decks
+				Unodeck drawDeck = new Unodeck(); 
+				Unodeck discardDeck = new Unodeck();	
 
-				System.out.println("runfilldeck");
+				System.out.println("runFillDeck/shuffleDeck");
 				drawDeck.fillDeck();
 				drawDeck.shuffleDeck();
 				
-				player1= new Player(drawDeck);
-				player2= new Player(drawDeck);
+				
+				player1 = new Player(drawDeck);
+				player2 = new Player(drawDeck);
 				drawDeck.validateStart();
 				discardDeck.pushCard(drawDeck.popCard());
 				
 				// Create data input and output streams
 				DataInputStream fromPlayer1 = new DataInputStream(player1socket.getInputStream());
-				DataOutputStream toPlayer1 = new DataOutputStream(player1socket.getOutputStream());;
-				DataInputStream fromPlayer2 = new DataInputStream(player2socket.getInputStream());;
-				DataOutputStream toPlayer2 = new DataOutputStream(player2socket.getOutputStream());;;
+				DataOutputStream toPlayer1 = new DataOutputStream(player1socket.getOutputStream());
+				DataInputStream fromPlayer2 = new DataInputStream(player2socket.getInputStream());
+				DataOutputStream toPlayer2 = new DataOutputStream(player2socket.getOutputStream());
 				
 				
-				 toPlayer1.writeUTF(player1.playerName); // send player1 name to client
-				 toPlayer1.flush();
-				 
-				 toPlayer2.writeUTF(player2.playerName); // send player2 name to client
-				 toPlayer2.flush();
-				 
-				 toPlayer1.writeUTF("Your turn, please select a card to play."); // send message to client
-				 toPlayer1.flush();
-				 
-				 toPlayer2.writeUTF("It's Player 1's turn. Please wait."); // send message to client
-				 toPlayer2.flush();
-				 
-				 // send initial data
-				 sendInitialData(toPlayer1, player2.playerName, player2.handSize, 
-						 		discardDeck.peekCard().toString(), player1.getCardsInHand().toString());
-				 sendInitialData(toPlayer2, player1.playerName, player1.handSize, 
-					 		discardDeck.peekCard().toString(), player2.getCardsInHand().toString());
-				 
+				sendInitial(fromPlayer1, toPlayer1, player2.getHandSize(), discardDeck.peekCard().toString(), 
+							player1.sendCardsInHand(player1.getCardsInHand()));
+				sendInitial(fromPlayer2, toPlayer2, player1.getHandSize(), discardDeck.peekCard().toString(), 
+							player2.sendCardsInHand(player2.getCardsInHand()));
+				
+				
 				
 				 // Continuously serve the players and determine and report
-				 while(true){ 
+				 
+				 while(game){ 
+					 
+					 // get the index from the client
+					 getPlay(player1, player2, fromPlayer1, toPlayer1, drawDeck, discardDeck); // int indexReceived = fromPlayer1.readInt();
+					 //send play from above to player 2
+					 sendPlay(toPlayer2,discardDeck);
+					 
+					 
+					 
+					 
+					 
 					 // Game logic functions and methods here
 					 
 					 /* Receive a play from Player 1
 					  * 	If Play:
-					  * 	- Push received card to top card of discard
+					  * 	- Push received card to top card of discard XXX DONE WOO XXX
 					  * 	If Draw
-					  * 	- pop card from draw deck and send to Player 1
+					  * 	- pop card from draw deck and send to Player 1 XXX DONE WOO XXX
 					  * Check if Player 1 wins
 					  * 	- True = break
 					  * 	- False = continue
@@ -208,44 +210,147 @@ class HandleASession implements Runnable, UnoConstants
 			} catch (IOException ex) {
 				System.err.println(ex);
 			}
+			
 		}
 		
-		// Send the move/play to the other player functions
 		
-		private void sendPlay(DataOutputStream output, String color, int value) throws IOException {
-			// Send data to client - Card passed should go onto the top of discard
-			output.writeUTF(color);
-			output.writeUTF(Integer.toString(value));
-			output.flush();
+//============================================================
+
+		// test KAS 11/27
+		public void sendInitial(DataInputStream fromPlayer, DataOutputStream toPlayer, int opponentCardAmt,
+								String firstDiscard, String playerHand) {
+
+			// send opponent card amount
+			try {
+				toPlayer.writeInt(opponentCardAmt);
+				toPlayer.flush();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}	
+			
+			// send the first discard to the client
+			try {
+				toPlayer.writeUTF(firstDiscard);
+				toPlayer.flush();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			// send the first discard to the client
+			try {
+				toPlayer.writeUTF(playerHand);
+				toPlayer.flush();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			
 		}
+		
+//============================================================
+
+		private void sendPlay(DataOutputStream toOpponent, 
+				Unodeck discardDeck) throws IOException {
+			
+			toOpponent.writeUTF(discardDeck.peekCard().toString());
+			
+		}
+		
+//============================================================
+
+		// Get the move/play from a player
+		
+		private void getPlay(Player player, Player opponent, DataInputStream fromPlayer, DataOutputStream toPlayer,Unodeck drawDeck, Unodeck discardDeck) throws IOException {
+			
+			int check = fromPlayer.readInt();
+			System.out.println("check:"+check);
+			System.out.println("before check play or draw");
+			if (check == PLAYCARD) {
+			System.out.println("if play statement");
+				// Send data to client - Card passed should go onto the top of discard
+				int indexReceived = fromPlayer.readInt();
+				// push that card from player's hand to the discardDeck
+				System.out.println("card before play:"+discardDeck.peekCard());
+				discardDeck.pushCard(player1.hand[indexReceived]);
+				System.out.println("card after play:"+discardDeck.peekCard());
+				// Send Data function will:
+				// Send player hand ========================================
+				try {
+					toPlayer.writeUTF(player.sendCardsInHand(player.getCardsInHand())); // Send the new hand
+					toPlayer.flush();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				// send top discard
+				// send the first discard to the client
+				try {
+					toPlayer.writeUTF(discardDeck.peekCard().toString());
+					toPlayer.flush();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+				// send opponent handSize
+				/*try {
+					toPlayer.writeInt(opponent.getHandSize());
+					toPlayer.flush();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}	
+				*/
+				
+			}
+			else if(check==DRAW)
+			{	
+				player.displayHand();
+				player.updateHandAfterDraw(drawDeck.popCard());
+				player.displayHand();
+				
+				System.out.println("Send these: " + player.sendCardsInHand(player.getCardsInHand()));
+				toPlayer.writeUTF(player.sendCardsInHand(player.getCardsInHand()));
+
+			}
+			if (check==PLAYER1_WON)
+			{
+				game=false;
+			}
+			if (check==PLAYER2_WON)
+			{
+				game=false;
+			}
+			//toPlayer.writeBoolean(false);
+			// Opponent handsize is playerObject.handSize;
+			System.out.println("after all checks");
+		}
+
+
+//============================================================
+
 		
 		private boolean checkWin() {
 			// If the players handSize == 0, then they won!
 			return false;
 		}
 		
+//============================================================
+
+		
 		private boolean isEmpty() {
 			// Check to see if Draw Deck is empty, if it is, then pop all cards
 			// from discard to draw and shuffle
 			return false;
 		}
+
+
 		
-		public void sendInitialData(DataOutputStream player, String opponentName, int opponentHandSize, String topDiscard, String playerHand) {
-			try {
-				player.writeUTF(opponentName);
-				player.flush();
-				player.writeInt(opponentHandSize);
-				player.flush();
-				player.writeUTF(topDiscard);
-				player.flush();
-				player.writeUTF(playerHand);
-				player.flush();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		
+
+//============================================================
 		
 		
 		/* private void sendMove(DataOutputStream out, int row, int column)
@@ -256,3 +361,26 @@ class HandleASession implements Runnable, UnoConstants
 		 * 
 		 */	
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

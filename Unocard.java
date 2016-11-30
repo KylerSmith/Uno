@@ -1,4 +1,4 @@
-package UnoVersion_04;
+package UnoVersion_05;
 import java.util.Random;
 
 /* cards 0-5
@@ -14,7 +14,7 @@ public class Unocard {
 	private String color; // color of the card
     private int value; // value of the card
     private Random randomNum;
-    private String action = null;
+    private String action = "NUMBER_CARD";
     
     // constructor to set number card
     public Unocard(String pColor, int pValue) {

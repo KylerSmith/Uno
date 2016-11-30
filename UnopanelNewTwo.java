@@ -1,4 +1,4 @@
-package practice;
+package UnoVersion_05;
 
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
@@ -25,8 +25,9 @@ import javax.swing.JTextField;
 import javax.swing.UIManager;
 import javax.swing.JTextPane;
 import javax.swing.SwingConstants;
+import java.io.BufferedReader;
 
-public class UnopanelNewTwo extends JFrame {
+public class UnopanelNewTwo extends JFrame implements UnoConstants {
 
 	// Instantiate game variables
 	// Public
@@ -38,8 +39,14 @@ public class UnopanelNewTwo extends JFrame {
 	String selectedCardNumber;
 	Color theSelectedCardColor = Color.GRAY;
 	
+	int player;
+	
+	// while playing variables
 	static boolean myTurn;
-	static boolean gameStarted = false;
+	boolean waiting = true;
+	String currentSelectedCard; // should be in the form (color,value)
+	boolean continueToPlay = true;
+	boolean isValidPlay = false;
 	
 	// Private
 	private DataOutputStream toServer;
@@ -54,9 +61,12 @@ public class UnopanelNewTwo extends JFrame {
 	// Runtime variables
 	// Initiation variables
 	String opponentName;
-	int playerCardCount;
+	int opponentCardCount;
 	String topDiscardCard;
 	String playersHand;
+	static boolean gameStarted = false;
+	
+	
 	
 	// Start of Main ===============================================
 	public static void main(String[] args){
@@ -214,7 +224,6 @@ public class UnopanelNewTwo extends JFrame {
 		
 			JButton play = new JButton("Play Game");
 			play.setBounds(389, 342, 287, 82);		
-			
 			GameMenuPanel.add(connect);		
 			
 			
@@ -231,50 +240,78 @@ public class UnopanelNewTwo extends JFrame {
 		HelpPanel.setBounds(0, 0, 1060, 584);
 		contentPane.add(HelpPanel);
 		
+		// other player hand size
+		JLabel otherPlayerhandSize = new JLabel("handSize");
+		otherPlayerhandSize.setBounds(451, 102, 61, 16);
+		GameBoardPanel.add(otherPlayerhandSize);
+				
+		// pay this card button
+		JButton btnPlaythiscard = new JButton("PlayThisCard");
+		btnPlaythiscard.setBounds(490, 530, 117, 29);
+		GameBoardPanel.add(btnPlaythiscard);
+		
+		
+		
 		HelpPanel.setVisible(false);
 		
-		// ACTION LISTENERS ===============================================
+// ACTION LISTENERS ===============================================
+		
+				//send draw function
+		 
 		
 		
 				// drawButton will act everytime a card is drawn.
 				drawButton.addActionListener(new ActionListener() {
-					public void actionPerformed(ActionEvent e) {
-						// TODO:
+					public void actionPerformed(ActionEvent e) 
+					{
+						//PlayDraw
+						try{
+						//Send to server that client wants to draw a card
+						toServer.writeInt(DRAW);
+						}
+						catch(IOException ex)
+						{
+							ex.printStackTrace();
+						}
+						try{
+							//Send to server that client wants to draw a card
+							playersHand = fromServer.readUTF();
+							System.out.println("Cars read from server: " + playersHand);
+							slider.setMaximum(slider.getMaximum()+1);
+							myTurn=false;
+							}
+						catch(IOException ex)
+						{
+							ex.printStackTrace();
+						}
+						
+						
 					}
 				});
+				
 
-		// =============================================================
+// =============================================================
 				
 				// play goes to the panel with the game
 				play.addActionListener(new ActionListener() {
-					public void actionPerformed(ActionEvent e){
-					
+					public void actionPerformed(ActionEvent e){	
+						
 						gameStarted = true;
 						play.setVisible(false);
 						GameMenuPanel.setVisible(false);
 						HelpPanel.setVisible(false);
 						GameBoardPanel.setVisible(true);
-						
-						// ------ Connect to server -----------
-					    try {
-
-					        // Create a socket to connect to the server
-					        Socket socket = new Socket(host, port); // localhost:8000
-
-					        // Create IO streams to input/output data from the server
-					        fromServer = new DataInputStream(socket.getInputStream());
-					        toServer =  new DataOutputStream(socket.getOutputStream() );
-					      }
-					      catch (IOException ex) {
-					        System.out.println(ex.toString());
-					      }
-					    // -------------------------
-						// Get initial data
-					    receiveInitialData();
-					    //parseInitialData();
 					    
-					    
-					    
+						// this is the code that runs until there is a winner!
+						try {
+							run();
+						} catch (IOException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						} catch (InterruptedException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}
 					}
 				});
 				
@@ -283,10 +320,9 @@ public class UnopanelNewTwo extends JFrame {
 				// play goes to the panel with the game
 				connect.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e){
-					
-						// ------ Connect to server -----------
+						
+				// --------------- Connect to server ----------------------------
 					    try {
-
 					        // Create a socket to connect to the server
 					        Socket socket = new Socket(host, port); // localhost:8000
 
@@ -297,20 +333,20 @@ public class UnopanelNewTwo extends JFrame {
 					      catch (IOException ex) {
 					        System.out.println(ex.toString());
 					      }
-					    // -------------------------
-					    
+				// -----------------------------------------------------------------
+
+					    receiveInitialData(otherPlayerName, otherPlayerhandSize);
+
+					    // find a game button disappears, play button appears -GUI-
 						connect.setVisible(false);
+						connect.setEnabled(false);
 						GameMenuPanel.add(play);
 						play.setVisible(true);
-						
-					    
-					    
-					    
 					}
 				});
 				
 				
-		// =============================================================
+// =============================================================
 
 				btnHelp.addActionListener(new ActionListener(){
 					public void actionPerformed(ActionEvent e) {	
@@ -321,7 +357,7 @@ public class UnopanelNewTwo extends JFrame {
 					}
 				});
 				
-		// =============================================================
+// =============================================================
 
 				btnGame.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
@@ -338,241 +374,171 @@ public class UnopanelNewTwo extends JFrame {
 					}
 				});
 				
-				// other player hand size
-				JLabel otherPlayerhandSize = new JLabel("handSize");
-				otherPlayerhandSize.setBounds(451, 102, 61, 16);
-				GameBoardPanel.add(otherPlayerhandSize);
-						
-				// pay this card button
-				JButton btnPlaythiscard = new JButton("PlayThisCard");
-				btnPlaythiscard.setBounds(490, 530, 117, 29);
-				GameBoardPanel.add(btnPlaythiscard);
-	
-				
-				
+
+// =============================================================
 				
 				// play this card button
 				btnPlaythiscard.addActionListener(new ActionListener(){
 					@Override
 					public void actionPerformed(ActionEvent e) {
-						// TODO:
+						validatePlay(currentSelectedCard, topDiscardCard);
+						if (isValidPlay) {
+							// send the index of the choosen card to the server to evaluate which card to play
+							sendPlay(slider.getValue() - 1);
+						} else {
+							//Invalid Card Error dialog
+							String [] e1 = topDiscardCard.split(",");
+							String eColor = e1[0];
+							String eVal = e1[1];
+							JOptionPane.showMessageDialog(null,
+							    "Please play a card that's either " + eColor +" Or is " + eVal,
+							    "Invalid Card",
+							    JOptionPane.ERROR_MESSAGE);
+						}
+						isValidPlay = false;
 					}
 				});
 				
-				
-				
+// =============================================================
+			
 				slider.setMaximum(handSize);
-				
-				JLabel BackgroundLabel = new JLabel("New label");
-				BackgroundLabel.setIcon(new ImageIcon("C:\\Class\\SER215\\Project\\Pics\\UI\\background.jpg"));
-				BackgroundLabel.setBounds(0, 0, 1060, 590);
-				GameBoardPanel.add(BackgroundLabel);
 				
 				// action listener for the slider
 				slider.addChangeListener(new ChangeListener() {
 					@Override
 					public void stateChanged(ChangeEvent e) {
 						
-						String [] thisCardProperties = new String[2];
-						
-						for(int i = 0; i < handSize - 1; i++){
-							
-							thisCardProperties = theCardsInHand[i].split(",");
-							
-							//System.out.println(thisCardProperties[0]+" "+thisCardProperties[1]);
-									
-							if(slider.getValue() == (i+1)){
-								
-								//theSelectedcardPosition.setText("Card "+(i+1));
-								String thisCardNumber = thisCardProperties[1];
-								String thisCardColor = thisCardProperties[0];
-								
-								// gives the selected card a value to check against
-								selectedCard[0] = thisCardColor;
-								selectedCard[1] = thisCardNumber;
-								
-								
-								if(thisCardColor.equals("yellow")){
-									theSelectedCardColor = Color.yellow;
-									selectedCardColor.setBackground(theSelectedCardColor);
-									selectedCardNumber.setForeground(Color.black);
-								}else if(thisCardColor.equals("black")){
-									theSelectedCardColor = Color.black;
-									selectedCardColor.setBackground(theSelectedCardColor);
-									selectedCardNumber.setForeground(Color.white);
-								}else if(thisCardColor.equals("blue")){
-									theSelectedCardColor = Color.blue;
-									selectedCardColor.setBackground(theSelectedCardColor);
-									selectedCardNumber.setForeground(Color.black);
-								}else if(thisCardColor.equals("green")){
-									theSelectedCardColor = Color.green;
-									selectedCardColor.setBackground(theSelectedCardColor);
-									selectedCardNumber.setForeground(Color.black);
-								}else if(thisCardColor.equals("red")){
-									theSelectedCardColor = Color.red;
-									selectedCardColor.setBackground(theSelectedCardColor);
-									selectedCardNumber.setForeground(Color.black);
-								}
-								
-								
-								selectedCardNumber.setText(thisCardNumber);
-								
-							}
-							
-						}
-						
-						
-						
+						// should return the card in the hand @ that pos
+						String [] h = playersHand.split(":");
+						currentSelectedCard = h[slider.getValue() - 1];
+						// print the current selected card
+						System.out.println(currentSelectedCard);
 					}
-				});
-			//  ******************************** GAME SCREEN COMPONENTS *************************************
+				});	
 				
-				
-			}
+			} // end constructor
+	
 			
+// ==========================================================	
 			
-			// Initiate Discard Deck
-			public void initiateDiscard(String color, String value, JPanel theCardBackground, JLabel theCardValue){
-				
-				if(color.equals("yellow")){
-					theCardBackground.setBackground(Color.yellow);
-					theCardValue.setForeground(Color.black);
-				}else if(color.equals("black")){
-					theCardBackground.setBackground(Color.black);
-					theCardValue.setForeground(Color.white);
-				}else if(color.equals("blue")){
-					theCardBackground.setBackground(Color.blue);
-					theCardValue.setForeground(Color.black);
-				}else if(color.equals("green")){
-					theCardBackground.setBackground(Color.green);
-					theCardValue.setForeground(Color.black);
-				}else if(color.equals("red")){
-					theCardBackground.setBackground(Color.red);
-					theCardValue.setForeground(Color.black);
+	// recieve all the initial values from the server
+	
+			public void receiveInitialData(JLabel pOtherPlayerName, JLabel pOtherPlayerhandSize) {
+				 // set the player to the player number they are
+			    try {
+					player = fromServer.readInt();
+				    // set the opponents label according to who started first
+				    if (player == PLAYER1) {
+				    	pOtherPlayerName.setText("Player 2");
+				    	myTurn = true; // set the first turn to player 1
+				    } else {
+				    	pOtherPlayerName.setText("Player 1");
+				    	myTurn = false; // set the first turn to player1
+				    }
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
 				}
-				theCardValue.setText(value);
-			}
 			
-			
-			// initiate hand
-			public String [] initiatehand(String theCardsInfo){
-
-				String [] forHands = new String[20];
-				
-				String [] theHand = theCardsInfo.split(":");
-				
-				for(int i = 0; i < handSize; i++){
-					forHands[i] = theHand[i]; 
+			    // set the card amount for opponent from the server
+			    try {
+			    	opponentCardCount = fromServer.readInt();
+			    	pOtherPlayerhandSize.setText(Integer.toString(opponentCardCount));
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
 				}
-				
-				return forHands;
-			}
-			
-			
-		// ==========================================================
-			
-			
-			
-			public String getColorName(Color theColor){
-				
-				System.out.println(theColor);
-				
-				String colorName = "";
-				
-				if(theColor.equals(Color.GREEN)){
-					
-					colorName = "Green";
-					
-				}else if(theColor.equals(Color.YELLOW)){
-					
-					colorName = "Yellow";
-					
-				}else if(theColor.equals(Color.BLUE)){
-					
-					colorName = "Blue";
-					
-				}else if(theColor.equals(Color.BLACK)){
-					
-					colorName = "Black";
-					
-				}else if(theColor.equals(Color.RED)){
-					
-					colorName = "Red";
-					
+			    
+			    // read the first card sent to the client
+			    try {
+			    	// GOOD- returns the correct card that was initially discarded
+			    	topDiscardCard = fromServer.readUTF();
+ 			    	System.out.println("card to play:\n" + topDiscardCard);
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
 				}
-				
-				return colorName;
-			}
-			
-		// ==========================================================
-
-			
-			public Color getColor(String thisCardColor){
-				
-				Color myColor = Color.GRAY;
-				
-				if(thisCardColor.equals("yellow")){
-					myColor = Color.yellow;;
-				}else if(thisCardColor.equals("black")){
-					myColor = Color.black;
-				}else if(thisCardColor.equals("blue")){
-					myColor = Color.blue;
-				}else if(thisCardColor.equals("green")){
-					myColor = Color.green;
-				}else if(thisCardColor.equals("red")){
-					myColor = Color.red;
+			    
+			    // GOOD- read the players hand and puts into string
+			    try {
+			    	playersHand = fromServer.readUTF();
+			    	System.out.println("Player hand:\n" + playersHand);
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
 				}
-				
-				return myColor;
 			}
 			
-		// ==========================================================	
-			
-			public void receiveInitialData() {
-				try {
-					System.out.println("1st receive");
-					opponentName = fromServer.readUTF();
-					System.out.println(opponentName + "<<< opponent name");
-					
-					System.out.println("2nd receive");
-					playerCardCount = fromServer.readInt();
-					System.out.println(playerCardCount + "<<< Card count");
-					
-					System.out.println("3rd receive");
-					topDiscardCard = fromServer.readUTF();
-					
-					System.out.println("4th receive");
-					playersHand = fromServer.readUTF();
-					
-				} catch (IOException ex){
-					System.err.println(ex);
-				}	
-			}
-			
-			public void parseInitialData() {
-				// opponentName is fine
-				// playerCardCount is fine
-				String [] discardTopCard = new String[2]; // hold value and color of top discard card
-				discardTopCard = topDiscardCard.split(",");
-				
-				String [] initialHand = new String[5];
-				initialHand = playersHand.split(":");
-				
-				//color,value:color,value:color,value
-			}
 			
 			// Opposite Player name			x UTF
 		    // Opposite player card count	x INT
 		    // top Discard Card				x UTF
-		    // Player playersHand			x UTF (will be parsed differently)
-			
-	public void run() 
-	{
+		    // Player playersHand			x UTF
+
+// ==========================================================	
+
+	// These functions should be in the GameLogic.java file
+
+	private void validatePlay(String pCurrentCard, String pLastPlayedCard) {
+		String [] played = pCurrentCard.split(",");
+		String [] checkAgainst = pLastPlayedCard.split(",");
+		
+		// checks the current selected card against the card last played
+		if (played[0].equals(checkAgainst[0])) {
+			System.out.println("Colors match!");
+			isValidPlay = true;
+		} else if (played[1].equals(checkAgainst[1])) {
+			System.out.println("Values match!");
+			isValidPlay = true;
+		} else if (played[0].equals("black")) {
+			System.out.println("wildCard played!");
+			isValidPlay = true;
+			// select a new color to play
+		} else {
+			System.out.println("Invalid play!");
+			isValidPlay = false;
+		}
+	}
+	
+	private void playOrDraw() {
+		// whichever player will be able to play or draw a card
+	}
+	
+	private boolean checkPlay(Unocard playedCard){
+		// If card is a wild, matches number, or color, return true
+		// If it does not meet above requirements, show error message
+		return false;
+	}
+	
+	// sends card information to the Server
+	private void sendPlay(int index) {
+		// sends the index of the card in the hand to the server
+		try {
+			System.out.println("index sent: " + index);
+			toServer.writeInt(PLAYCARD);
+			toServer.writeInt(index);
+		} catch (IOException e) {
+			e.printStackTrace();
+		} 		
+	}
+	
+
+	
+	// run function
+	public void run() throws IOException, InterruptedException  {
+				
+		System.out.println("RUN FUNCTION!");
+		
+		
+
+		
+		
+		
 		/*
-		 * Get player name from server
-		 * Determine if you are player 1 or player 2
-		 * - if player 2, myTurn = false;
-		 * - else myTurn = true;
+		 * Get player name from server						X DONE in recieve data
+		 * Determine if you are player 1 or player 2		X DONE in recieve data
+		 * - if player 2, myTurn = false;					X Client checks turn		
+		 * - else myTurn = true;							^^^
 		 * Wait for another player to join
 		 * After other player has joined, continue to play
 		 * Player 1:
@@ -606,24 +572,6 @@ public class UnopanelNewTwo extends JFrame {
 		 * 				- Draw will receive data
 		 */
 	}
-	
-	
-	// These functions should be in the GameLogic.java file
-	private void playOrDraw() {
-		// whichever player will be able to play or draw a card
-	}
-	
-	private boolean checkPlay(Unocard playedCard){
-		// If card is a wild, matches number, or color, return true
-		// If it does not meet above requirements, show error message
-		return false;
-	}
-	
-	private void sendPlay() throws IOException {
-		// sends card information to the Server
-	}
-	
-	
 	
 	
 	
