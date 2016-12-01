@@ -427,33 +427,34 @@ public class UnoPanel extends JFrame implements UnoConstants, Runnable {
 
 			while (continueToPlay) {
 				
-				System.out.print("\nINSIDE WHILE LOOP\n");
+				System.out.print("\nENTER WHILE LOOP\n");
 				
 				
 				if (player == PLAYER1) {
 					
-					System.out.println("wait for player 1 to make a move");
+					System.out.println("\nwait for player 1 to make a move\n");
 					// wait for player 1 to make a move
 					waitForPlayerAction();
 					
-					
-					
+					System.out.println("\nSending move to server\n");
 					// Send the move to the server
 			        sendMove(); 
-			        
+			        			        
+			        System.out.println("\nWaiting to recieve to move from server\n");
 			        // recieve update from server of player2's move
 					receiveInfoFromServer();
-
 					
 				} else if (player == PLAYER2) {
 					
-					System.out.println("Waiting to recieve to move from server");
+					System.out.println("\nWaiting to recieve to move from server\n");
 					// Receive info from the server
 					receiveInfoFromServer();
 					
+					System.out.println("\nWaiting for player2 to move\n");
 					// Wait for player 2 to move
 					waitForPlayerAction();
 				
+					System.out.println("\nSending move to server\n");
 					// Send player 2's move to the server
 					sendMove(); 
 				}
@@ -472,6 +473,7 @@ public class UnoPanel extends JFrame implements UnoConstants, Runnable {
 	
 	private void sendMove() {
 		
+		/** send the move to the server */
 		if (status == PLAYCARD) { // Play card
 			
 			try {
@@ -486,9 +488,7 @@ public class UnoPanel extends JFrame implements UnoConstants, Runnable {
 				
 				// get the new topDiscard
 				topDiscardCard = fromServer.readUTF(); // UnoServer:195
-				
-				// test *******************
-				System.out.println("New top discard after play: " + topDiscardCard);
+				System.out.println("NEW TOP DISCARD CARD: " + topDiscardCard);
 				
 				// decrememnt the hand size
 				--handSize;
@@ -524,8 +524,7 @@ public class UnoPanel extends JFrame implements UnoConstants, Runnable {
 			}
 		}
 		
-		// change the turn to the opponent
-		myTurn = !myTurn;
+		
 		
 	}
 	
@@ -536,10 +535,18 @@ public class UnoPanel extends JFrame implements UnoConstants, Runnable {
 	
 	public void receiveInfoFromServer() throws IOException {
 		
-		// determine game status from server
-		checkStatus = fromServer.readInt();
+		// get the play from the user
+		topDiscardCard = fromServer.readUTF();
+		
+		System.out.println("\nnew top discard: " + topDiscardCard);
+		
+		// get the new hand of the other player
+		otherPlayerhandSize.setText(Integer.toString(fromServer.readInt()));
 		
 		
+		
+		//checkStatus = fromServer.readInt();
+		System.out.print("here");
 		
 		
 		
@@ -605,6 +612,23 @@ private void updateAfterPlay(JSlider slider, String hand, JButton btnPlay, JButt
 		    	Thread.sleep(100);
 		    }
 		    	waiting = true;
+		}
+		
+//------------------------------------------------------------------------------------
+
+		
+		private void switchTurns() {
+			
+			// able and disable buttons per player
+			myTurn = !myTurn;
+			
+			if (player == PLAYER1) {
+				drawButton.setEnabled(myTurn);
+				btnPlaythiscard.setEnabled(myTurn);
+			} else {
+				drawButton.setEnabled(myTurn);
+				btnPlaythiscard.setEnabled(myTurn);
+			}
 		}
 
 		

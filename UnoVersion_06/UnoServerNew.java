@@ -115,8 +115,6 @@ class HandleASession implements Runnable, UnoConstants
 		public void run() {
 			try {
 
-				
-				
 				// Instantiate decks
 				Unodeck drawDeck = new Unodeck(); 
 				Unodeck discardDeck = new Unodeck();
@@ -147,15 +145,13 @@ class HandleASession implements Runnable, UnoConstants
 				sendInitial(fromPlayer2, toPlayer2, player1.getHandSize(), discardDeck.peekCard().toString(), 
 							player2.sendCardsInHand(player2.getCardsInHand()));
 				
-				// let player1 know to start
-				// doesn't enter while loop in run func until this is sent
-				toPlayer1.writeInt(10); 
-				
 				 // Continuously serve the players and determine and report
 				 while(true){ 
 					 
-					 		// get the play from player1
-					 // play(player1, player2, fromPlayer1, toPlayer1, discardDeck, drawDeck, toPlayer2);
+					 
+					 
+					 // get the play from player1
+					 play(player1, player2, fromPlayer1, toPlayer1, discardDeck, drawDeck, toPlayer2);
 					 
 				 }
 				
@@ -195,12 +191,14 @@ class HandleASession implements Runnable, UnoConstants
 				toPlayer.writeUTF(player.sendCardsInHand(player.getCardsInHand())); // UnoPanel:492
 				toPlayer.flush();
 				
-				// send the first discard to the client
+				// send the first discard to the player 
 				toPlayer.writeUTF(discardDeck.peekCard().toString()); // UnoPanel:486
 				toPlayer.flush();	
 				
 				// send the PLAY to the opponent
-				sendMove(toOpponent, discardDeck); //
+				sendMove(toOpponent, discardDeck, player.getHandSize()); 
+				
+				
 				
 			} else if(status == DRAW) {	
 
@@ -218,25 +216,35 @@ class HandleASession implements Runnable, UnoConstants
 			if (player1.getHandSize() == 0) {
 				// all of player1's cards are gone, they win!
 				System.out.println("Player1 wins!");
+				continueToPlay = false;
 			} else if (player2.getHandSize() == 0) {
 				// all of player2's cards are gone, they win!
 				System.out.println("Player2 wins!");
+				continueToPlay = false;
+			} if (drawDeck.deckSize == 1) {
+				System.out.println("It's a draw! No cards left!");
 			}
-			
-			System.out.println("Player1 hand after");
-			player1.displayHand();			
 		}
 		
+		
+//============================================================
+
+		// for the action cards
+		
+		public void afterMove() {}
 		
 		
 //============================================================
 		
 		// overload send play for play
-		private void sendMove(DataOutputStream toOpponent, Unodeck discardDeck) throws IOException {
+		private void sendMove(DataOutputStream toOpponent, Unodeck discardDeck, int newHandSize) throws IOException {
 			
 			// if opponent played card, sent to the player
 			System.out.println("Send this card to the client: " + discardDeck.peekCard().toString());
 			toOpponent.writeUTF(discardDeck.peekCard().toString());
+			
+			toOpponent.writeInt(newHandSize);
+			toOpponent.flush();
 			
 		}
 		

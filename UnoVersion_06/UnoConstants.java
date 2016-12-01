@@ -7,4 +7,5 @@ public interface UnoConstants {
 	public static final int PLAYER2_WON = 2; // Indicate player 2 won
 	public static final int DRAW = 3; // Indicate a draw
 	public static final int PLAYCARD = 4; // Indicate a played card
+	public static final int CONTINUE = 5; // Indicate to continue game
 }
