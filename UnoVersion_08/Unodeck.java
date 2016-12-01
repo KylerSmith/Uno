@@ -15,46 +15,34 @@ public class Unodeck {
 	final int MAX_DECK_SIZE = 74;
 	
 	Unocard[] deck = new Unocard[MAX_DECK_SIZE];
-	int deckSize = MAX_DECK_SIZE ;
+	int deckSize = 0;
 	
 	//==================================================================================
 
 	public Unocard peekCard() {
-		Unocard returnCard  = deck[deckSize - 1]; // deckSize - 1
-		return returnCard;	
+		return deck[deckSize]; // deckSize - 1
 	}
 	
 	//==================================================================================
 
-	
 	public Unocard popCard() {
-		Unocard returnCard;
-		returnCard = deck[deckSize - 1];
 		deckSize--;
-		return returnCard;
+		return deck[deckSize];
 	}
 	
 	//==================================================================================
-	
+
 	public void pushCard(Unocard c) {
-		deck[deckSize] = c;
+		deck[deckSize + 1] = c;
 		deckSize++;
 	}
-	
-	//==================================================================================
-
-	
-	
-	
 		
 	//==================================================================================
 	
 	public void displayDeck() {
 		System.out.println("");
 		for (int i = 0; i < deckSize; ++i) {
-			
 			System.out.print(i + ": ");
-			//System.out.print("value of card is" + deck[i].getValue() + " ");
 			
 			if ((deck[i].getValue() <= 5) && (deckSize > 0)) {
 				/* displays the color and number if its a number card */
@@ -82,7 +70,7 @@ public class Unodeck {
 		 
 		for(int j=0;j<4;j++)
 		{
-			
+				
 			for(int i=0;i<18;i++)
 			{
 				Unocard card = new Unocard();
@@ -103,7 +91,15 @@ public class Unodeck {
 					if(actIndex==3)actIndex=0;
 				}
 			
-			deck[i]=card;
+				if (j == 1) {
+					deck[i+18]=card;
+				} else if (j == 2) {
+					deck[i+36]=card;
+				} else if (j == 3) {
+					deck[i+54]=card;
+				} else deck[i]=card;
+				
+
 			}
 			colorIndex++;
 		}
@@ -113,13 +109,13 @@ public class Unodeck {
 		card.setValue(6);
 		card.setAction("wild");
 		deck[72]=card;
-	
-		card = new Unocard();
-		card.setValue(6);
-		card.setAction("wild");
+//	
+//		card = new Unocard();
+//		card.setValue(6);
+//		card.setAction("wild");
 		deck[73]=card;
 		
-				
+		deckSize = MAX_DECK_SIZE;		
 	}
 	
 //==================================================================================
@@ -130,37 +126,30 @@ public class Unodeck {
 		//Unocard tmp;
 		Random randomNum = new Random();
 		
-		
-		
-		
 		while (count < thoroughness) {
+			
 			Unocard tmp = new Unocard();
+			randCardPos = randomNum.nextInt(MAX_DECK_SIZE);
 			
-			
-			
-			randCardPos = randomNum.nextInt(MAX_DECK_SIZE - 1);
-			
-			System.out.println("INDEX_Rand: " + randCardPos);
-			
-			/* perform swap */
-			deck[randCardPos].displayCard();
-			
-			tmp.setColor(deck[randCardPos].getColor());
-			tmp.setValue(deck[randCardPos].getValue());
-			tmp.setAction(deck[randCardPos].getAction());
+			tmp = deck[randCardPos];
 			deck[randCardPos] = deck[0];
 			deck[0] = tmp;
+			
 			++count;
 			
 			}
 		
+
+		
 		}	
 	
 //==================================================================================
-	public void validateStart(){
+	public void validateStart() {
 	    boolean flag = false;
 	    while (!flag) { 
-	    	if (deck[deckSize - 1].getValue() > 5) { // If an action card, shuffle
+	    	
+	    	// If an action card, shuffle
+	    	if (deck[deckSize - 1].getValue() > 5) { 
 	    		shuffleDeck();
 	        } else flag = true; 					// else exit 
 	    }

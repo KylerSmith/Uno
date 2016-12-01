@@ -54,7 +54,7 @@ public class Unocard {
     }
     
     public String toString() {
-    	if (value < 5) {
+    	if (value < 6) {
     		return color + "," + value;
     	} else {
     		return color + "," + action;
