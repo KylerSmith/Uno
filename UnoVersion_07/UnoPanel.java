@@ -462,6 +462,11 @@ public class UnoPanel extends JFrame implements UnoConstants, Runnable {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
+		
+		
+		
+		
+		
 
 		
 	}	
@@ -479,10 +484,6 @@ public class UnoPanel extends JFrame implements UnoConstants, Runnable {
 		/** send the move to the server */
 		if (status == PLAYCARD) { // Play card
 			
-			// decrememnt the hand size
-			--handSize;
-			slider.setMaximum(handSize);
-			
 			try {
 				// Send status to server that client wants to play a card
 				toServer.writeInt(PLAYCARD); // UnoServer:176, path:1
@@ -496,6 +497,10 @@ public class UnoPanel extends JFrame implements UnoConstants, Runnable {
 				
 				// get the new topDiscard
 				topDiscardCard = fromServer.readUTF(); // UnoServer:195
+				
+				// decrememnt the hand size
+				--handSize;
+				slider.setMaximum(handSize);
 				
 			}
 			catch(IOException ex) {
@@ -518,8 +523,9 @@ public class UnoPanel extends JFrame implements UnoConstants, Runnable {
 				// test to see if they hand updated correctly
 				System.out.println("Cards read from server after draw: " + playersHand);
 				
-				// increase the slider to 
-				slider.setMaximum(slider.getMaximum() + 1);
+				// increase the slider to
+				++handSize;
+				slider.setMaximum(handSize);
 				
 			}
 			catch(IOException ex) {
@@ -542,8 +548,17 @@ public class UnoPanel extends JFrame implements UnoConstants, Runnable {
 		int tmp = 0;
 		
 		
-		int status = fromServer.readInt();
+		status = fromServer.readInt();
 		System.out.println("STATUS_CODE: " + status);
+		
+		// if condition to check to see if it is win lose or tie
+		if (status == PLAYER1_WON) {
+			continueToPlay = false;
+		} else if (status == PLAYER2_WON) {
+			continueToPlay = false;
+		} else if (status == DRAW_GAME) {
+			continueToPlay = false;	
+		}
 		
 		// get the play from the user
 		topDiscardCard = fromServer.readUTF();
@@ -551,68 +566,11 @@ public class UnoPanel extends JFrame implements UnoConstants, Runnable {
 		
 		// get the new hand of the other player
 		tmp = fromServer.readInt();
+		System.out.println("\nOther play hand size: " + tmp);
 		otherPlayerhandSize.setText(Integer.toString(tmp));
-		
-//		if (status == PLAYER1_WON) {
-//			continueToPlay = false;
-//			
-//		} else if (status == PLAYER2_WON) {
-//			continueToPlay = false;
-//			
-//		} else if (status == DRAW_GAME) {
-//			continueToPlay = false;
-//			
-//		} else {
-//			
-//		}		
-	}
-	
-	
-	
-	
-	
-	
-//------------------------------------------------------------------------------------
 
-/** update the slider, and the hand to have one less card */
-private void updateAfterPlay(JSlider slider, String hand, JButton btnPlay, JButton draw) {
-	
-	if (myTurn == true) {
-		// new hand recieved from the server in the form color,val:color,val: ... etc.
-		try {
-			hand = fromServer.readUTF();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		// recieve newDiscard
-		try {
-			topDiscardCard = fromServer.readUTF();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		
-	} else if (myTurn == false) {
-		try {
-			topDiscardCard = fromServer.readUTF();
-			System.out.println("Opponent played: ");
-
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 	}
 
-	 // update the slider size
-	slider.setMaximum(slider.getMaximum() - 1);
-	// switch the button enable
-	btnPlay.setEnabled(myTurn);
-	draw.setEnabled(myTurn);
-	
-}
-	
 //------------------------------------------------------------------------------------
 
 		private void waitForPlayerAction() throws InterruptedException {

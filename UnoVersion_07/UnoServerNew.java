@@ -177,7 +177,7 @@ class HandleASession implements Runnable, UnoConstants
 				DataOutputStream toPlayer, Unodeck discardDeck, Unodeck drawDeck, DataOutputStream toOpponent)  throws IOException {
 			
 			// DB -------
-			System.out.println(player.playerName + " hand before move: ");
+			System.out.print("\n" + player.playerName + " hand before move: ");
 			player.displayHand();
 			// EDB ------------
 			
@@ -187,17 +187,21 @@ class HandleASession implements Runnable, UnoConstants
 			
 			// run this if they want to play a card
 			if (status == PLAYCARD) {
+				
+				System.out.println("PLAYCARD card played");
 			
 				// Send data to client - Card passed should go onto the top of discard
 				int indexReceived = fromPlayer.readInt(); // UnoPanel:489
-											
+				
+				System.out.println("INDEX: " + indexReceived + " by Player" + player.playerName);
+					
 				// push that card from player's hand to the discardDeck
-				discardDeck.pushCard(player1.hand[indexReceived]);
+				discardDeck.pushCard(player.hand[indexReceived]);
 
 				// take the card out of the server hand
-				player1.updateHandAfterPlay(indexReceived);
+				player.updateHandAfterPlay(indexReceived);
 				
-				 // Send the new hand, with one less card
+				// Send the new hand, with one less card
 				toPlayer.writeUTF(player.sendCardsInHand(player.getCardsInHand())); // UnoPanel:492
 				toPlayer.flush();
 				
@@ -205,8 +209,8 @@ class HandleASession implements Runnable, UnoConstants
 				toPlayer.writeUTF(discardDeck.peekCard().toString()); // UnoPanel:486
 				toPlayer.flush();	
 				
-			} else if(status == DRAW) {	
-
+			} else if(status == DRAW) {
+				
 				// updates the player's hand on the server
 				player.updateHandAfterDraw(drawDeck.popCard());
 				
@@ -216,7 +220,7 @@ class HandleASession implements Runnable, UnoConstants
 			}
 			
 			// DB ----------
-			System.out.println(player.playerName + "  hand after move: ");
+			System.out.print("\n" + player.playerName + "  hand after move: ");
 			player.displayHand();
 			// EDB ---------
 			
@@ -231,8 +235,9 @@ class HandleASession implements Runnable, UnoConstants
 				continueToPlay = false;
 			} if (drawDeck.deckSize == 1) {
 				newStatus = DRAW_GAME;
+			} else {
+				newStatus = CONTINUE;
 			}
-			
 			
 			
 			// send the PLAY to the opponent
@@ -249,10 +254,10 @@ class HandleASession implements Runnable, UnoConstants
 			} else {
 				
 				// SENDS THE STATUS OF THE GAME
+				System.out.println("STATUS_CODE: " + status);
 				toOpponent.writeInt(status);
 				
 				// if opponent played card, send to the player, card that is tobe checked against
-				System.out.println("Send this card to the client: " + discardDeck.peekCard().toString());
 				toOpponent.writeUTF(discardDeck.peekCard().toString());
 				
 				toOpponent.writeInt(newHandSize);
