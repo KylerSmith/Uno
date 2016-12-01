@@ -1,16 +1,9 @@
 # Uno
 Final Project
 
-Classes
-Player.java - Basicaly a console version of the game
+Special Instructions:
+Can only open 1 server per session
+After finishing the game, close both clients and repoen them to play again.
 
+Known Bugs:
 
-Unocard.java - The class that defines the cards
-
-Unodeck.java - Is a stack of Uno cards. There will be 2 instantiations of this class, draw deck and discard deck (in Unoserver.java) 
-
-unocard_test.java - Built for testing purposes
-
-
-GUI
-Unopanel.java - Main GUI
