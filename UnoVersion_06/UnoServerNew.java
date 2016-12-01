@@ -153,6 +153,8 @@ class HandleASession implements Runnable, UnoConstants
 					 // get the play from player1
 					 play(player1, player2, fromPlayer1, toPlayer1, discardDeck, drawDeck, toPlayer2);
 					 
+					 play(player2, player1, fromPlayer2, toPlayer2, discardDeck, drawDeck, toPlayer1);
+					 
 				 }
 				
 			} catch (IOException ex) {
@@ -172,6 +174,7 @@ class HandleASession implements Runnable, UnoConstants
 		private void play(Player player, Player opponent, DataInputStream fromPlayer, 
 				DataOutputStream toPlayer, Unodeck discardDeck, Unodeck drawDeck, DataOutputStream toOpponent)  throws IOException {
 			
+			int newStatus = 0;
 			// get the value for what button the player choose, (draw(3) or play(4)).
 			int status = fromPlayer.readInt(); // UnoServer:482 | UnoServer:511, respective to status
 			
@@ -186,7 +189,7 @@ class HandleASession implements Runnable, UnoConstants
 				
 				// take the card out of the server hand
 				player1.updateHandAfterPlay(indexReceived);
-				
+
 				 // Send the new hand, with one less card
 				toPlayer.writeUTF(player.sendCardsInHand(player.getCardsInHand())); // UnoPanel:492
 				toPlayer.flush();
@@ -194,67 +197,66 @@ class HandleASession implements Runnable, UnoConstants
 				// send the first discard to the player 
 				toPlayer.writeUTF(discardDeck.peekCard().toString()); // UnoPanel:486
 				toPlayer.flush();	
-				
-				// send the PLAY to the opponent
-				sendMove(toOpponent, discardDeck, player.getHandSize()); 
-				
-				
+
 				
 			} else if(status == DRAW) {	
+				
+				System.out.print("HERE::: ");
+				player.displayHand();
 
+				// updates the player's hand on the server
 				player.updateHandAfterDraw(drawDeck.popCard());
 				
 				// send the card in the hand as a string 
 				toPlayer.writeUTF(player.sendCardsInHand(player.getCardsInHand())); // UnoPanel:511
+				toPlayer.flush();
 				
-				// send the DRAW to the opponent
-				sendMove(toOpponent, player.getHandSize()); // UnoPanel:519
+				System.out.print("HERE::: ");
+				player.displayHand();
 			}
+			
+			
 			
 			
 			// check to see if anyone has won
 			if (player1.getHandSize() == 0) {
 				// all of player1's cards are gone, they win!
-				System.out.println("Player1 wins!");
+				newStatus = PLAYER1_WON;
 				continueToPlay = false;
 			} else if (player2.getHandSize() == 0) {
 				// all of player2's cards are gone, they win!
-				System.out.println("Player2 wins!");
+				newStatus = PLAYER2_WON;
 				continueToPlay = false;
 			} if (drawDeck.deckSize == 1) {
-				System.out.println("It's a draw! No cards left!");
+				newStatus = DRAW_GAME;
 			}
+			
+			
+			
+			// send the PLAY to the opponent
+			sendMove(toOpponent, discardDeck, player.getHandSize(), newStatus); 
 		}
-		
-		
-//============================================================
-
-		// for the action cards
-		
-		public void afterMove() {}
-		
 		
 //============================================================
 		
 		// overload send play for play
-		private void sendMove(DataOutputStream toOpponent, Unodeck discardDeck, int newHandSize) throws IOException {
+		private void sendMove(DataOutputStream toOpponent, Unodeck discardDeck, int newHandSize, int status) throws IOException {
 			
-			// if opponent played card, sent to the player
-			System.out.println("Send this card to the client: " + discardDeck.peekCard().toString());
-			toOpponent.writeUTF(discardDeck.peekCard().toString());
-			
-			toOpponent.writeInt(newHandSize);
-			toOpponent.flush();
-			
-		}
-		
-		// overload send play for draw
-		private void sendMove(DataOutputStream toOpponent, int newHandSize) throws IOException {
-			
-			// if opponent played card, sent to the player
-			System.out.println("New handSize of opponent: " + newHandSize);
-			toOpponent.writeInt(newHandSize);
-			
+			if (status == PLAYER1_WON || status == PLAYER2_WON || status == DRAW_GAME) {
+				System.out.println("GAME_OVER");
+			} else {
+				
+				// SENDS THE STATUS OF THE GAME
+				toOpponent.writeInt(status);
+				
+				// if opponent played card, send to the player, card that is tobe checked against
+				System.out.println("Send this card to the client: " + discardDeck.peekCard().toString());
+				toOpponent.writeUTF(discardDeck.peekCard().toString());
+				
+				toOpponent.writeInt(newHandSize);
+				toOpponent.flush();
+
+			}
 		}
 
 		

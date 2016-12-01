@@ -276,6 +276,7 @@ public class UnoPanel extends JFrame implements UnoConstants, Runnable {
 			    	System.exit(0);
 			    	try {
 			    		toServer.writeBoolean(false);
+			    		toServer.flush();
 					} catch (IOException e1) {
 						e1.printStackTrace();
 					}   	
@@ -318,7 +319,6 @@ public class UnoPanel extends JFrame implements UnoConstants, Runnable {
 				// client wants to play this card and its valid
 				if (isValidPlay) {
 					status = PLAYCARD;
-					myTurn = false;
 					waiting = false;
 				
 				} else { // Invalid Card Error dialog
@@ -344,7 +344,6 @@ public class UnoPanel extends JFrame implements UnoConstants, Runnable {
 		drawButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				status = DRAW;
-				myTurn = false;
 				waiting = false;
 			}
 		});
@@ -427,36 +426,36 @@ public class UnoPanel extends JFrame implements UnoConstants, Runnable {
 
 			while (continueToPlay) {
 				
-				System.out.print("\nENTER WHILE LOOP\n");
-				
+				System.out.print("\nPlayer" + player + " ENTERING WHILE LOOP\n");
 				
 				if (player == PLAYER1) {
 					
-					System.out.println("\nwait for player 1 to make a move\n");
+					System.out.print("\nPlayer" + player + " make a move\n");
 					// wait for player 1 to make a move
 					waitForPlayerAction();
-					
-					System.out.println("\nSending move to server\n");
+														
+					System.out.print("\nPlayer" + player + " Sending move to server\n");
 					// Send the move to the server
 			        sendMove(); 
 			        			        
-			        System.out.println("\nWaiting to recieve to move from server\n");
+			        System.out.print("\nPlayer" + player + " Waiting to recieve to move from server\n");
 			        // recieve update from server of player2's move
 					receiveInfoFromServer();
 					
 				} else if (player == PLAYER2) {
 					
-					System.out.println("\nWaiting to recieve to move from server\n");
+					System.out.print("\nPlayer" + player + " Waiting to recieve to move from server\n");
 					// Receive info from the server
 					receiveInfoFromServer();
 					
-					System.out.println("\nWaiting for player2 to move\n");
+					System.out.print("\nPlayer" + player + " Waiting for player2 to move\n");
 					// Wait for player 2 to move
 					waitForPlayerAction();
-				
-					System.out.println("\nSending move to server\n");
+								
+					System.out.print("\nPlayer" + player + " Sending move to server\n");
 					// Send player 2's move to the server
 					sendMove(); 
+
 				}
 			}
 		} catch (IOException | InterruptedException e1) {
@@ -473,22 +472,26 @@ public class UnoPanel extends JFrame implements UnoConstants, Runnable {
 	
 	private void sendMove() {
 		
+	    myTurn = false;
+	    drawButton.setEnabled(myTurn);
+		btnPlaythiscard.setEnabled(myTurn);
+		
 		/** send the move to the server */
 		if (status == PLAYCARD) { // Play card
 			
 			try {
 				// Send status to server that client wants to play a card
 				toServer.writeInt(PLAYCARD); // UnoServer:176, path:1
+				toServer.flush();
 				
 				// send the index of the card to play to the server
 				toServer.writeInt(slider.getValue() - 1); // UnoServer:182
-				
+				toServer.flush();
 				// read the new hand after the play
 				playersHand = fromServer.readUTF(); // UnoServer:191
 				
 				// get the new topDiscard
 				topDiscardCard = fromServer.readUTF(); // UnoServer:195
-				System.out.println("NEW TOP DISCARD CARD: " + topDiscardCard);
 				
 				// decrememnt the hand size
 				--handSize;
@@ -502,8 +505,12 @@ public class UnoPanel extends JFrame implements UnoConstants, Runnable {
 		} else if (status == DRAW) { // PlayDraw
 			
 			try {
+				
+				System.out.println("Cards read from server before draw: " + playersHand); 
+				
 				//Send to server that client wants to draw a card
 				toServer.writeInt(DRAW); // UnoServer:176, path:2
+				toServer.flush();
 				
 				//Send to server that client wants to draw a card
 				playersHand = fromServer.readUTF(); // UnoServer:216
@@ -514,18 +521,12 @@ public class UnoPanel extends JFrame implements UnoConstants, Runnable {
 				// increase the slider to 
 				slider.setMaximum(slider.getMaximum() + 1);
 				
-				// display the updated hand size
-				otherPlayerhandSize.setText(Integer.toString(fromServer.readInt())); // UnoServer:221
-				
-				
 			}
 			catch(IOException ex) {
 				ex.printStackTrace();
 			}
 		}
-		
-		
-		
+				
 	}
 	
 	
@@ -535,21 +536,32 @@ public class UnoPanel extends JFrame implements UnoConstants, Runnable {
 	
 	public void receiveInfoFromServer() throws IOException {
 		
+	    myTurn = false;
+	    drawButton.setEnabled(myTurn);
+		btnPlaythiscard.setEnabled(myTurn);
+		
+		int status = fromServer.readInt();
+		System.out.println("STATUS_CODE: " + status);
+		
 		// get the play from the user
 		topDiscardCard = fromServer.readUTF();
-		
-		System.out.println("\nnew top discard: " + topDiscardCard);
+		System.out.print("Top discarded Card: " + topDiscardCard);
 		
 		// get the new hand of the other player
 		otherPlayerhandSize.setText(Integer.toString(fromServer.readInt()));
 		
-		
-		
-		//checkStatus = fromServer.readInt();
-		System.out.print("here");
-		
-		
-		
+//		if (status == PLAYER1_WON) {
+//			continueToPlay = false;
+//			
+//		} else if (status == PLAYER2_WON) {
+//			continueToPlay = false;
+//			
+//		} else if (status == DRAW_GAME) {
+//			continueToPlay = false;
+//			
+//		} else {
+//			
+//		}		
 	}
 	
 	
@@ -589,13 +601,6 @@ private void updateAfterPlay(JSlider slider, String hand, JButton btnPlay, JButt
 			e.printStackTrace();
 		}
 	}
-	// opponentsHandSize
-//		try {
-//			hand = fromServer.readUTF();
-//		} catch (IOException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
 
 	 // update the slider size
 	slider.setMaximum(slider.getMaximum() - 1);
@@ -608,30 +613,17 @@ private void updateAfterPlay(JSlider slider, String hand, JButton btnPlay, JButt
 //------------------------------------------------------------------------------------
 
 		private void waitForPlayerAction() throws InterruptedException {
+					
+		    myTurn = true;
+		    drawButton.setEnabled(myTurn);
+			btnPlaythiscard.setEnabled(myTurn);
+			
 		    while (waiting) {
 		    	Thread.sleep(100);
 		    }
-		    	waiting = true;
-		}
-		
-//------------------------------------------------------------------------------------
 
-		
-		private void switchTurns() {
-			
-			// able and disable buttons per player
-			myTurn = !myTurn;
-			
-			if (player == PLAYER1) {
-				drawButton.setEnabled(myTurn);
-				btnPlaythiscard.setEnabled(myTurn);
-			} else {
-				drawButton.setEnabled(myTurn);
-				btnPlaythiscard.setEnabled(myTurn);
-			}
-		}
-
-		
+	    	waiting = true;
+		}		
 		
 //------------------------------------------------------------------------------------
 		
