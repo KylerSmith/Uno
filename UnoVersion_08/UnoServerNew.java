@@ -212,6 +212,16 @@ class HandleASession implements Runnable, UnoConstants
 				// send the card in the hand as a string 
 				toPlayer.writeUTF(player.sendCardsInHand(player.getCardsInHand())); // UnoPanel:511
 				toPlayer.flush();
+			} else if (status == PLAY_SKIP){
+				// Skip opponent and make it the same players turn again
+				
+			} else if (status == PLAY_DRAW_TWO){
+				// Push 2 cards to the opponent and skip he opponent
+				
+			} else if (status == PLAY_WILD){
+				// Change the color of the wild card to whatever color the player chooses
+				// Place this card on the discard and display a blank card.
+				
 			}
 
 			// check to see if anyone has won
