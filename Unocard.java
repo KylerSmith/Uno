@@ -1,4 +1,3 @@
-package UnoVersion_05;
 import java.util.Random;
 
 /* cards 0-5
@@ -13,24 +12,15 @@ public class Unocard {
 	
 	private String color; // color of the card
     private int value; // value of the card
+    private String action;//"NUMBER_CARD";
     private Random randomNum;
-    private String action = "NUMBER_CARD";
     
-    // constructor to set number card
-    public Unocard(String pColor, int pValue) {
-    	color = pColor;
-    	value = pValue;
-    }
-    // constructor to set action card
-    public Unocard(String pColor, String pAction) {
-    	color = pColor;
-    	action = pAction;
-    }
     
     // General Constructor
     public Unocard() {
     	color = "black";
     	value = -1;
+    	action = "default";
     }
     
     
@@ -62,20 +52,14 @@ public class Unocard {
     	color = pColor;
     }
     
-    public String toString() {
-    	if (value < 5) {
-    		return color + "," + value;
-    	} else {
-    		return color + "," + action;
-    	}
-    }
-    
-} // End UnoCard Class
-//===================================================================
-
-
-
-
+    public void displayCard()
+	{
+		System.out.print(getColor());
+		if(getValue()>5)System.out.println(","+getAction());
+		else
+		System.out.println(","+getValue());
+	}
+}
 
 
 
