@@ -260,6 +260,11 @@ public class UnoPanel extends JFrame implements UnoConstants, Runnable {
 		slider.setBounds(449, 489, 190, 29);
 		GameBoardPanel.add(slider);		
 		
+		
+
+		
+		
+		
 // Action Listeners ============================================================================
 		
 		
@@ -542,31 +547,25 @@ public class UnoPanel extends JFrame implements UnoConstants, Runnable {
 	
 	public void receiveInfoFromServer() throws IOException {
 		
+		// change to not myTurn
 	    myTurn = false;
+	    
+	    // read in the status of the game from the server
+		status = fromServer.readInt();
+		System.out.println("STATUS_CODE: " + status);
+	    
 	    drawButton.setEnabled(myTurn);
 		btnPlaythiscard.setEnabled(myTurn);
 		int tmp = 0;
 		
-		
-		status = fromServer.readInt();
-		System.out.println("STATUS_CODE: " + status);
-		
-		// if condition to check to see if it is win lose or tie
-		if (status == PLAYER1_WON) {
-			continueToPlay = false;
-		} else if (status == PLAYER2_WON) {
-			continueToPlay = false;
-		} else if (status == DRAW_GAME) {
-			continueToPlay = false;	
-		}
+		checkForWinner();
 		
 		// get the play from the user
 		topDiscardCard = fromServer.readUTF();
-		System.out.print("Top discarded Card: " + topDiscardCard);
+		System.out.print("\nTOP: " + topDiscardCard + "\n");
 		
 		// get the new hand of the other player
 		tmp = fromServer.readInt();
-		System.out.println("\nOther play hand size: " + tmp);
 		otherPlayerhandSize.setText(Integer.toString(tmp));
 
 	}
@@ -574,7 +573,7 @@ public class UnoPanel extends JFrame implements UnoConstants, Runnable {
 //------------------------------------------------------------------------------------
 
 		private void waitForPlayerAction() throws InterruptedException {
-					
+			
 		    myTurn = true;
 		    drawButton.setEnabled(myTurn);
 			btnPlaythiscard.setEnabled(myTurn);
@@ -588,6 +587,42 @@ public class UnoPanel extends JFrame implements UnoConstants, Runnable {
 		
 //------------------------------------------------------------------------------------
 		
+		
+		private void showWinner(String winner) {
+			
+			JOptionPane.showMessageDialog(null,
+				    winner + " won!",
+				    "GAME OVER!",
+				    JOptionPane.ERROR_MESSAGE);
+		}
+		
+		
+		
+//------------------------------------------------------------------------------------
+		// if condition to check to see if it is win lose or tie
+		public void checkForWinner() {
+			if (status == PLAYER1_WON) {
+				
+				continueToPlay = false;
+				System.out.println("PLAYER1_WON");
+				showWinner("Player1");
+				
+			} else if (status == PLAYER2_WON) {
+				
+				continueToPlay = false;
+				System.out.println("PLAYER2_WON");
+				showWinner("Player2");
+				
+			} else if (status == DRAW_GAME) {
+				
+				continueToPlay = false;	
+				System.out.println("DRAW");
+				showWinner("No one");
+			}
+		}
+		
+//------------------------------------------------------------------------------------
+
 		
 		private void connectToServer() {
 			// --------------- Connect to server ----------------------------

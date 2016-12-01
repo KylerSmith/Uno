@@ -15,6 +15,7 @@ public class Player {
 		++playerNum;
 		playerName = "Player" + playerNum;
 		
+		// initiate hand
 		for (int i = 0; i <= 4; ++i) {
 			hand[handSize] = d.popCard();
 			++handSize;

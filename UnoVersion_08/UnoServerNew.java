@@ -149,14 +149,19 @@ class HandleASession implements Runnable, UnoConstants
 							player2.sendCardsInHand(player2.getCardsInHand()));
 				
 				 // Continuously serve the players and determine and report
-				 while(true){ 
+				 while(true) { 
 					 
-					 // get the play from player1
-					 play(player1, player2, fromPlayer1, toPlayer1, discardDeck, drawDeck, toPlayer2);
-					 
-					 // get the play from player2
-					 play(player2, player1, fromPlayer2, toPlayer2, discardDeck, drawDeck, toPlayer1);
-					 
+					 while (continueToPlay) {
+						 // get the play from player1
+						 play(player1, player2, fromPlayer1, toPlayer1, discardDeck, drawDeck, toPlayer2);
+						 
+						 // check to see if player1's move ends game
+						 if (!continueToPlay)
+							 break;
+						 
+						 // get the play from player2
+						 play(player2, player1, fromPlayer2, toPlayer2, discardDeck, drawDeck, toPlayer1);
+					 }
 				 }
 				
 			} catch (IOException ex) {
@@ -176,20 +181,16 @@ class HandleASession implements Runnable, UnoConstants
 		private void play(Player player, Player opponent, DataInputStream fromPlayer, 
 				DataOutputStream toPlayer, Unodeck discardDeck, Unodeck drawDeck, DataOutputStream toOpponent)  throws IOException {
 			
-			int newStatus = 0;
+			int sendStatus;
 			// get the value for what button the player choose, (draw(3) or play(4)).
-			int status = fromPlayer.readInt(); // UnoServer:482 | UnoServer:511, respective to status
+			int receivedStatus = fromPlayer.readInt(); // UnoServer:482 | UnoServer:511, respective to status
 			
 			// run this if they want to play a card
-			if (status == PLAYCARD) {
-				
-				System.out.println("PLAYCARD card played");
-			
+			if (receivedStatus == PLAYCARD) {
+							
 				// Send data to client - Card passed should go onto the top of discard
 				int indexReceived = fromPlayer.readInt(); // UnoPanel:489
-				
-				System.out.println("INDEX: " + indexReceived + " by Player" + player.playerName);
-					
+							
 				// push that card from player's hand to the discardDeck
 				discardDeck.pushCard(player.hand[indexReceived]);
 
@@ -204,7 +205,7 @@ class HandleASession implements Runnable, UnoConstants
 				toPlayer.writeUTF(discardDeck.peekCard().toString()); // UnoPanel:486
 				toPlayer.flush();	
 				
-			} else if(status == DRAW) {
+			} else if(receivedStatus == DRAW) {
 				
 				// updates the player's hand on the server
 				player.updateHandAfterDraw(drawDeck.popCard());
@@ -215,23 +216,32 @@ class HandleASession implements Runnable, UnoConstants
 			}
 
 			// check to see if anyone has won
-			if (player1.getHandSize() == 0) {
+			if (player1.getHandSize() <= 3) {
+				
 				// all of player1's cards are gone, they win!
-				newStatus = PLAYER1_WON;
+				sendStatus = PLAYER1_WON;
 				continueToPlay = false;
-			} else if (player2.getHandSize() == 0) {
+				
+			} else if (player2.getHandSize() <= 3) {
+				
 				// all of player2's cards are gone, they win!
-				newStatus = PLAYER2_WON;
+				sendStatus = PLAYER2_WON;
 				continueToPlay = false;
-			} if (drawDeck.deckSize == 1) {
-				newStatus = DRAW_GAME;
+				
+			} else if (drawDeck.deckSize == 0) {
+				
+				sendStatus = DRAW_GAME;
+				continueToPlay = false;
+				
 			} else {
-				newStatus = CONTINUE;
-			}
+				//sendStatus = CONTINUE;
+				sendStatus = CONTINUE;
+			}			
 			
+			System.out.println("\nsendStatus- " + sendStatus);
 			
 			// send the PLAY to the opponent
-			sendMove(toOpponent, discardDeck, player.getHandSize(), newStatus); 
+			sendMove(toOpponent, discardDeck, player.getHandSize(), sendStatus); 
 		}
 		
 //============================================================
@@ -239,13 +249,27 @@ class HandleASession implements Runnable, UnoConstants
 		// overload send play for play
 		private void sendMove(DataOutputStream toOpponent, Unodeck discardDeck, int newHandSize, int status) throws IOException {
 			
-			if (status == PLAYER1_WON || status == PLAYER2_WON || status == DRAW_GAME) {
-				System.out.println("GAME_OVER");
+			System.out.println("status- " + status);
+			
+			// SENDS THE STATUS OF THE GAME
+			System.out.println("STATUS_CODE: " + status);
+			toOpponent.writeInt(status);
+			
+			if (status == PLAYER1_WON) {
+				
+				System.out.println("PLAYER1 Won");
+				
+			} else if (status == PLAYER2_WON) {
+				
+				System.out.println("PLAYER2 Won");
+				
+			} else if (status == DRAW_GAME) {
+				
+				System.out.println("DRAW");				
+				
 			} else {
 				
-				// SENDS THE STATUS OF THE GAME
-				System.out.println("STATUS_CODE: " + status);
-				toOpponent.writeInt(status);
+
 				
 				// if opponent played card, send to the player, card that is tobe checked against
 				toOpponent.writeUTF(discardDeck.peekCard().toString());
@@ -285,19 +309,6 @@ class HandleASession implements Runnable, UnoConstants
 			
 		}
 
-		
-		
-
-//============================================================
-		
-		
-		/* private void sendMove(DataOutputStream out, int row, int column)
-      	 *		throws IOException {
-		 *	    out.writeInt(row); // Send row index
-		 *	    out.writeInt(column); // Send column index
-  		 *	}
-		 * 
-		 */	
 }
 
 

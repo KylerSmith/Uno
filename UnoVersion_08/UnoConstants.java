@@ -9,4 +9,6 @@ public interface UnoConstants {
 	public static final int DRAW = 3; // Indicate a draw
 	public static final int PLAYCARD = 4; // Indicate a played card
 	public static final int CONTINUE = 5; // Indicate to continue game
+	public static final int SKIP = 6;
+	public static final int REVERSE = 7;
 }
