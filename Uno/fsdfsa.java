@@ -1,4 +1,5 @@
-package UnoVersion_08;
+package UnoVersion_10;
+
 
 public class fsdfsa {
 
@@ -9,6 +10,8 @@ public class fsdfsa {
 		Unodeck dis = new Unodeck();
 		
 		draw.fillDeck();	
+		draw.displayDeck();
+		
 		draw.shuffleDeck();
 		
 		draw.displayDeck();

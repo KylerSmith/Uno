@@ -1,4 +1,4 @@
-package UnoVersion_08;
+package UnoVersion_10;
 
 import java.util.Random;
 
@@ -55,6 +55,8 @@ public class Unodeck {
 	}
 	
 	//==================================================================================
+
+	
 	
 	// Adrian's fill deck method
 	
@@ -101,7 +103,9 @@ public class Unodeck {
 				
 
 			}
+			
 			colorIndex++;
+			
 		}
 		
 		//Make Wild Cards

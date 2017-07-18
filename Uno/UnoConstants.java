@@ -1,4 +1,4 @@
-package UnoVersion_08;
+package UnoVersion_10;
 
 public interface UnoConstants {
 	public static final int PLAYER1 = 1; // Indicate player 1
@@ -11,4 +11,6 @@ public interface UnoConstants {
 	public static final int CONTINUE = 5; // Indicate to continue game
 	public static final int SKIP = 6;
 	public static final int REVERSE = 7;
+	public static final int DRAW_TWO = 8;
+	public static final int WILD = 9;
 }

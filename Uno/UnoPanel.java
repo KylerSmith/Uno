@@ -144,7 +144,7 @@ public class UnoPanel extends JFrame implements UnoConstants, Runnable {
 		
 		otherPlayerName = new JLabel("No player has joined...");
 		otherPlayerName.setForeground(Color.WHITE);
-		otherPlayerName.setIcon(new ImageIcon("/Users/TreyZor/Downloads/rsz_user.png"));
+		otherPlayerName.setIcon(new ImageIcon(this.getClass().getResource("/UnoVersion_10/UI/rsz_user.png")));
 		otherPlayerName.setBounds(419, 6, 201, 131);
 		GameBoardPanel.add(otherPlayerName);
 		
@@ -196,9 +196,9 @@ public class UnoPanel extends JFrame implements UnoConstants, Runnable {
 		
 		// Slider =========================================
 		slider = new JSlider();
-		slider.setMinimum(1);
-		slider.setMaximum(5);
-		slider.setValue(3);
+		slider.setMinimum(0);
+		slider.setMaximum(4);
+		slider.setValue(2);
 		slider.setBounds(449, 489, 190, 29);
 		GameBoardPanel.add(slider);		
 		
@@ -339,8 +339,6 @@ public class UnoPanel extends JFrame implements UnoConstants, Runnable {
 				
 				// check to make sure its a valid play
 				validatePlay(currentSelectedCard, topDiscardCard);
-				System.out.println("wildCardColor: " + wildCardColor);
-				
 				
 				// client wants to play this card and its valid
 				if (isValidPlay) {
@@ -354,15 +352,16 @@ public class UnoPanel extends JFrame implements UnoConstants, Runnable {
 					String eVal = e1[1];
 					if (eVal.equals("wild")){
 						JOptionPane.showMessageDialog(null,
-							    "Please play a card that's " + eColor,
-							    "Invalid Card",
-							    JOptionPane.ERROR_MESSAGE);
+						    "Please play a card that's " + eColor,
+						    "Invalid Card",
+						    JOptionPane.ERROR_MESSAGE);
 					} else { 
 					JOptionPane.showMessageDialog(null,
 					    "Please play a card that's either " + eColor +" Or is " + eVal,
 					    "Invalid Card",
 					    JOptionPane.ERROR_MESSAGE);
 					}
+
 				}
 				
 				isValidPlay = false;
@@ -437,7 +436,8 @@ public class UnoPanel extends JFrame implements UnoConstants, Runnable {
 			public void stateChanged(ChangeEvent e) {
 					// should return the card in the hand @ that pos
 					String [] cardsInHand = playersHand.split(":");
-					currentSelectedCard = cardsInHand[slider.getValue() - 1];
+					currentSelectedCard = cardsInHand[slider.getValue()];
+					
 					// print the current selected card
 					System.out.println(currentSelectedCard);
 					
@@ -530,12 +530,14 @@ public class UnoPanel extends JFrame implements UnoConstants, Runnable {
 	    myTurn = false;
 	    drawButton.setEnabled(myTurn);
 		btnPlaythiscard.setEnabled(myTurn);
-		
-		
-		if (currentSelectedCard.contains("wild")) {
-			System.out.println("Entered if statement");
+				
+		// check to see if action card
+		if (currentSelectedCard.contains("draw two")) {
+			status = DRAW_TWO;
+		} else if (currentSelectedCard.contains("wild")) {
 			status = WILD;
 		}
+		
 		/** send the move to the server */
 		if (status == PLAYCARD) { // Play card
 			
@@ -545,8 +547,9 @@ public class UnoPanel extends JFrame implements UnoConstants, Runnable {
 				toServer.flush();
 				
 				// send the index of the card to play to the server
-				toServer.writeInt(slider.getValue() - 1); // UnoServer:182
+				toServer.writeInt(slider.getValue()); // UnoServer:182
 				toServer.flush();
+				
 				// read the new hand after the play
 				playersHand = fromServer.readUTF(); // UnoServer:191
 				
@@ -560,7 +563,7 @@ public class UnoPanel extends JFrame implements UnoConstants, Runnable {
 				
 				// decrememnt the hand size
 				--handSize;
-				slider.setMaximum(handSize);
+				slider.setMaximum(handSize - 1);
 				
 				// ============================== DISPLAY NEW CARDS =========================
 		    	String [] receivedCards = playersHand.split(":");
@@ -623,12 +626,82 @@ public class UnoPanel extends JFrame implements UnoConstants, Runnable {
 				
 				// increase the slider to
 				++handSize;
-				slider.setMaximum(handSize);
+				slider.setMaximum(handSize - 1);
 				
 			}
-			
-			
 			catch(IOException ex) {
+				ex.printStackTrace();
+			}
+		} else if (status == DRAW_TWO) {
+			try {
+				// Send status to server that client wants to play a card
+				toServer.writeInt(DRAW_TWO); // UnoServer:176, path:1
+				toServer.flush();
+				
+				// send the index of the card to play to the server
+				toServer.writeInt(slider.getValue()); // UnoServer:182
+				toServer.flush();
+				
+				// read the new hand after the play
+				playersHand = fromServer.readUTF(); // UnoServer:191
+				
+				// displays the "You Win!" if player 
+				if (playersHand.split(":").length == 0) {
+					showWinner("You");
+				}
+				
+				// get the new topDiscard
+				topDiscardCard = fromServer.readUTF(); // UnoServer:195
+				
+				// decrememnt the hand size
+				--handSize;
+				slider.setMaximum(handSize - 1);
+				
+				// read opponents hand size
+				int tmp = fromServer.readInt();
+				otherPlayerhandSize.setText(Integer.toString(tmp));
+				
+				// ============================== DISPLAY NEW CARDS =========================
+		    	String [] receivedCards = playersHand.split(":");
+		    	String middleCard = receivedCards[receivedCards.length/2];
+		    	
+		    	BufferedImage middleCardImage = null;
+		
+		try {
+		
+		middleCardImage = ImageIO.read(this.getClass().getResourceAsStream("/UnoVersion_10/gameCards/"+middleCard+".jpg"));
+		
+		} catch (IOException e) {
+		
+		}
+		
+		Image theResizedCardImageForMiddleCard = 
+		middleCardImage.getScaledInstance(selectedCardLabel.getWidth(), selectedCardLabel.getHeight(),Image.SCALE_DEFAULT);
+		    
+		ImageIcon theFlippedCardIcon = new ImageIcon(theResizedCardImageForMiddleCard);
+
+		selectedCardLabel.setIcon(theFlippedCardIcon);
+		
+		BufferedImage topDiscardCardImage = null;
+		
+		try {
+		
+		topDiscardCardImage = ImageIO.read(this.getClass().getResourceAsStream("/UnoVersion_10/gameCards/"+topDiscardCard+".jpg"));
+		
+		} catch (IOException e) {
+		
+		}
+		
+		Image theResizedCardImageFortopDiscard = 
+		topDiscardCardImage.getScaledInstance(topDiscard.getWidth(), topDiscard.getHeight(),Image.SCALE_DEFAULT);
+		    
+		ImageIcon topDiscardIcon = new ImageIcon(theResizedCardImageFortopDiscard);
+
+		topDiscard.setIcon(topDiscardIcon);
+				
+
+				
+			} catch (IOException ex) {
 				ex.printStackTrace();
 			}
 		} else if (status == WILD){
@@ -641,7 +714,7 @@ public class UnoPanel extends JFrame implements UnoConstants, Runnable {
 				toServer.writeUTF(wildCardColor);
 				
 				// send the index of the card to play to the server
-				toServer.writeInt(slider.getValue() - 1); // UnoServer:182
+				toServer.writeInt(slider.getValue()); // UnoServer:182
 				toServer.flush();
 				
 				// read the new hand after the play
@@ -660,22 +733,22 @@ public class UnoPanel extends JFrame implements UnoConstants, Runnable {
 				slider.setMaximum(handSize);
 				
 				// ============================== DISPLAY NEW CARDS =========================
-		    	String [] receivedCards = playersHand.split(":");
-		    	String middleCard = receivedCards[receivedCards.length/2];
-		    	
-		    	BufferedImage middleCardImage = null;
+				    	String [] receivedCards = playersHand.split(":");
+				    	String middleCard = receivedCards[receivedCards.length/2];
+				    	
+				    	BufferedImage middleCardImage = null;
 				
 				try {
-					
-					middleCardImage = ImageIO.read(this.getClass().getResourceAsStream("/UnoVersion_10/gameCards/"+middleCard+".jpg"));
-					
+				
+				middleCardImage = ImageIO.read(this.getClass().getResourceAsStream("/UnoVersion_10/gameCards/"+middleCard+".jpg"));
+				
 				} catch (IOException e) {
-					
+				
 				}
 				
 				Image theResizedCardImageForMiddleCard = 
-						middleCardImage.getScaledInstance(selectedCardLabel.getWidth(), selectedCardLabel.getHeight(),Image.SCALE_DEFAULT);
-			    
+				middleCardImage.getScaledInstance(selectedCardLabel.getWidth(), selectedCardLabel.getHeight(),Image.SCALE_DEFAULT);
+				    
 				ImageIcon theFlippedCardIcon = new ImageIcon(theResizedCardImageForMiddleCard);
 
 				selectedCardLabel.setIcon(theFlippedCardIcon);
@@ -683,26 +756,25 @@ public class UnoPanel extends JFrame implements UnoConstants, Runnable {
 				BufferedImage topDiscardCardImage = null;
 				
 				try {
-					
-					topDiscardCardImage = ImageIO.read(this.getClass().getResourceAsStream("/UnoVersion_10/gameCards/"+topDiscardCard+".jpg"));
-					
+				
+				topDiscardCardImage = ImageIO.read(this.getClass().getResourceAsStream("/UnoVersion_10/gameCards/"+topDiscardCard+".jpg"));
+				
 				} catch (IOException e) {
-					
+				
 				}
 				
 				Image theResizedCardImageFortopDiscard = 
-						topDiscardCardImage.getScaledInstance(topDiscard.getWidth(), topDiscard.getHeight(),Image.SCALE_DEFAULT);
-			    
+				topDiscardCardImage.getScaledInstance(topDiscard.getWidth(), topDiscard.getHeight(),Image.SCALE_DEFAULT);
+				    
 				ImageIcon topDiscardIcon = new ImageIcon(theResizedCardImageFortopDiscard);
 
 				topDiscard.setIcon(topDiscardIcon);
 				
-			}
-			catch(IOException ex) {
-				ex.printStackTrace();
-			}
-		}
-				
+				}
+				catch(IOException ex) {
+					ex.printStackTrace();
+				}
+			} 	
 	}
 	
 	
@@ -713,6 +785,9 @@ public class UnoPanel extends JFrame implements UnoConstants, Runnable {
 	public void receiveInfoFromServer() throws IOException {
 		
 	    myTurn = false;
+	    
+	    playersHand = fromServer.readUTF();
+	    
 	   
 		status = fromServer.readInt();
 		System.out.println("STATUS_CODE: " + status);
@@ -826,21 +901,24 @@ public class UnoPanel extends JFrame implements UnoConstants, Runnable {
 				// select a new color to play
 				wildCardColor = wildDialog();
 				while (wildCardColor.equals("No option chosen")) {
-					wildCardColor = wildDialog();
-				}
-				return colorChosen;
+				wildCardColor = wildDialog();
+			}
+			
+			return colorChosen;
 			} else if (played[0].equals(checkAgainst[0])) {
 				System.out.println("Colors match!");
 				isValidPlay = true;
-				
+			
 			} else if (played[1].equals(checkAgainst[1])) {
 				System.out.println("Values match!");
 				isValidPlay = true;
-				
+			
 			}  else {
 				System.out.println("Invalid play!");
 				isValidPlay = false;
-			} return null;
+			} 
+			
+			return null;
 		}
 		
 //------------------------------------------------------------------------------------
@@ -920,76 +998,61 @@ public class UnoPanel extends JFrame implements UnoConstants, Runnable {
 			e1.printStackTrace();
 		}
 	}
-	//------------------------------------------------------------------------------------
-	
-	
-			private void showWinner(String winner) {
-				
-				JOptionPane.showMessageDialog(null,
-					    winner + " won!",
-					    "GAME OVER!",
-					    JOptionPane.ERROR_MESSAGE);
-			}
-			
-			
-			
-	//------------------------------------------------------------------------------------
-			// if condition to check to see if it is win lose or tie
-			public void checkStatus(int newStatus) {
-				
-				if (newStatus == PLAYER1_WON) {
-					
-					continueToPlay = false;
-					System.out.println("PLAYER1_WON");
-					showWinner("Player1");
-					
-				} else if (newStatus == PLAYER2_WON) {
-					
-					continueToPlay = false;
-					System.out.println("PLAYER2_WON");
-					showWinner("Player2");
-					
-				} else if (newStatus == DRAW_GAME) {
-					
-					continueToPlay = false;	
-					System.out.println("DRAW");
-					showWinner("No one");
-					
-				} else if (newStatus == WILD) {
-					
-					// write if there is a wild card played
-					
-					
-					
-				}
-				
-			}
-			
-			public String wildDialog(){
-				Object[] colors = {"blue", "red", "yellow", "green"};
-				String response = (String)JOptionPane.showInputDialog(
-				                    null,null,
-				                    "Choose Color",
-				                    JOptionPane.PLAIN_MESSAGE,
-				                    null,
-				                    colors,
-				                    "blue");
+//------------------------------------------------------------------------------------
 
-				//If a string was returned, say so.
-				if ((response != null) && (response.length() > 0)) {
-				    return response;
-				}
-				return "No option chosen";
+
+		private void showWinner(String winner) {
+			
+			JOptionPane.showMessageDialog(null,
+				    winner + " won!",
+				    "GAME OVER!",
+				    JOptionPane.ERROR_MESSAGE);
+		}
+			
+			
+		
+//------------------------------------------------------------------------------------
+		// if condition to check to see if it is win lose or tie
+		public void checkStatus(int newStatus) {
+			
+			if (newStatus == PLAYER1_WON) {
+				
+				continueToPlay = false;
+				System.out.println("PLAYER1_WON");
+				showWinner("Player1");
+				
+			} else if (newStatus == PLAYER2_WON) {
+				
+				continueToPlay = false;
+				System.out.println("PLAYER2_WON");
+				showWinner("Player2");
+				
+			} else if (newStatus == DRAW_GAME) {
+				
+				continueToPlay = false;	
+				System.out.println("DRAW");
+				showWinner("No one");
+			}
+			
+		}
+		
+		//------------------------------------------------------------------------------------
+	
+		
+		public String wildDialog(){
+			Object[] colors = {"blue", "red", "yellow", "green"};
+			String response = (String)JOptionPane.showInputDialog(
+			                    null,null,
+			                    "Choose Color",
+			                    JOptionPane.PLAIN_MESSAGE,
+			                    null,
+			                    colors,
+			                    "blue");
+
+			//If a string was returned, say so.
+			if ((response != null) && (response.length() > 0)) {
+			    return response;
+			}
+			return "No option chosen";
 			}
 }
-
-
-
-
-
-
-
-
-
-
-

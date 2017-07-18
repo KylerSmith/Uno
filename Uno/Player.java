@@ -1,4 +1,4 @@
-package UnoVersion_08;
+package UnoVersion_10;
 
 public class Player {
 	
@@ -57,7 +57,6 @@ public class Player {
 			} else {
 				cards[i] = hand[i].getColor() + "," + hand[i].getAction();
 			}		
-			//System.out.println(cards[i]);
 		}
 		return cards;
 	}
@@ -123,17 +122,3 @@ public class Player {
 	}
 	
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
