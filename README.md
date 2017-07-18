@@ -1,3 +1,4 @@
 # Uno
 
-## Uno written in Java. Feel free to constribute!
+Uno written in Java.
+Feel free to contribute!
